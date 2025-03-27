@@ -23,6 +23,23 @@
 - Language translation system
 - Unit conversion real-time updates
 
+## [1.3.1] - 2024-03-28
+
+### Changed
+
+- Improved layout organization:
+  - Removed duplicate Precipitation chart from top section
+  - Moved Precipitation chart exclusively to 24-Hours tab
+  - Enhanced Sunrise & Sunset card layout
+- Updated component tests to use new WeatherData interface
+- Improved type safety across components
+
+### Fixed
+
+- Fixed duplicate Precipitation chart display
+- Fixed TypeScript errors in component tests
+- Fixed property name mismatches in WeatherData interfaces
+
 ## [1.3.0] - 2024-03-28
 
 ### Added
