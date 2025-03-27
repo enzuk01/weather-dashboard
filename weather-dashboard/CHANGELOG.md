@@ -4,6 +4,31 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Pending Implementation
+
+- Language translation system
+- Unit conversion real-time updates
+
+## [1.2.1] - 2024-03-27
+
+### Fixed
+
+- Fixed "Cannot read properties of undefined" errors in weather components
+  - Added null checks and default values in CurrentWeatherDisplay
+  - Enhanced error handling in WindChart component
+  - Improved data validation in DailyForecastCards
+- Fixed settings panel not properly reflecting current theme state
+- Fixed settings panel animation transitions on mount/unmount
+- Fixed temperature unit conversion not updating the dashboard display
+- Fixed wind speed unit conversion not updating the dashboard display
+- Fixed precipitation unit conversion not updating the dashboard display
+
+### Added
+
 - Added automated documentation checks with Husky pre-commit hooks
 - Added commitlint for conventional commit message enforcement
 - Added documentation maintenance guidelines to README.md
@@ -12,19 +37,6 @@
 
 - Updated documentation maintenance process with automated checks
 - Enhanced Git workflow with conventional commits
-
-### Fixed
-
-- Fixed settings panel not properly reflecting current theme state
-- Fixed settings panel animation transitions on mount/unmount
-- Fixed temperature unit conversion not updating the dashboard display
-- Fixed wind speed unit conversion not updating the dashboard display
-- Fixed precipitation unit conversion not updating the dashboard display
-
-### Pending Implementation
-
-- Language translation system
-- Unit conversion real-time updates
 
 ## [1.2.0] - 2025-03-27
 

@@ -53,13 +53,15 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
     };
 
     // Format temperature with unit
-    const formatTemperature = (celsius: number): string => {
+    const formatTemperature = (celsius: number | undefined): string => {
+        if (celsius === undefined) return 'N/A';
         const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
         return `${Math.round(temp)}°`;
     };
 
     // Format wind speed with unit
-    const formatWindSpeed = (kph: number): string => {
+    const formatWindSpeed = (kph: number | undefined): string => {
+        if (kph === undefined) return 'N/A';
         const speed = convertWindSpeed(kph, 'kph', windSpeedUnit);
         return `${Math.round(speed)}`;
     };
@@ -99,7 +101,7 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
                         </div>
                         <div className="flex justify-center mb-2 sm:mb-3">
                             <WeatherIcon
-                                weatherCode={forecastData.weather_code[index]}
+                                weatherCode={forecastData.weather_code[index] ?? 0}
                                 isDay={true}
                                 size="md"
                             />
@@ -116,14 +118,16 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
                         </div>
                         <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs sm:text-sm text-white/70">
                             <div className="flex items-center">
-                                <WindDirectionIndicator
-                                    direction={forecastData.wind_direction_10m_dominant[index]}
-                                    size="sm"
-                                />
+                                {forecastData.wind_direction_10m_dominant[index] !== undefined && (
+                                    <WindDirectionIndicator
+                                        direction={forecastData.wind_direction_10m_dominant[index]}
+                                        size="sm"
+                                    />
+                                )}
                                 <span className="ml-1">{formatWindSpeed(forecastData.wind_speed_10m_max[index])}</span>
                             </div>
                             <div>
-                                <span>{Math.round(forecastData.precipitation_probability_max[index])}%</span>
+                                <span>{forecastData.precipitation_probability_max[index] !== undefined ? Math.round(forecastData.precipitation_probability_max[index]) : 'N/A'}%</span>
                             </div>
                         </div>
                     </div>

@@ -127,19 +127,22 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
     };
 
     // Format temperature with unit
-    const formatTemperature = (celsius: number): string => {
+    const formatTemperature = (celsius: number | undefined): string => {
+        if (typeof celsius === 'undefined') return 'N/A';
         const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
         return `${Math.round(temp)}°${temperatureUnit === 'celsius' ? 'C' : 'F'}`;
     };
 
     // Format wind speed with unit
-    const formatWindSpeed = (kph: number): string => {
+    const formatWindSpeed = (kph: number | undefined): string => {
+        if (typeof kph === 'undefined') return 'N/A';
         const speed = convertWindSpeed(kph, 'kph', windSpeedUnit);
         return `${Math.round(speed)} ${windSpeedUnit}`;
     };
 
     // Format precipitation with unit
-    const formatPrecipitation = (mm: number): string => {
+    const formatPrecipitation = (mm: number | undefined): string => {
+        if (typeof mm === 'undefined') return 'N/A';
         const amount = convertPrecipitation(mm, 'mm', precipitationUnit);
         return `${amount.toFixed(1)} ${precipitationUnit}`;
     };
@@ -166,37 +169,37 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <WeatherIcon
-                        weatherCode={weatherData.weather_code}
+                        weatherCode={weatherData.weather_code ?? 0}
                         isDay={weatherData.is_day === 1}
                         size="xl"
                     />
                     <div>
                         <h2 className="text-3xl font-bold">
-                            {temperature.toFixed(1)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
+                            {formatTemperature(weatherData.temperature_2m)}
                         </h2>
                         <p className="text-lg text-gray-600 dark:text-gray-300">
-                            Feels like {convertTemperature(weatherData.apparent_temperature, 'celsius', temperatureUnit).toFixed(1)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
+                            Feels like {formatTemperature(weatherData.apparent_temperature)}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="text-center">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Humidity</p>
-                        <p className="text-lg font-semibold">{weatherData.relative_humidity_2m}%</p>
+                        <p className="text-lg font-semibold">{weatherData.relative_humidity_2m ?? 'N/A'}%</p>
                     </div>
                     <div className="text-center">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Wind</p>
                         <div className="flex items-center gap-2">
-                            <WindDirectionIndicator direction={weatherData.wind_direction_10m} />
+                            <WindDirectionIndicator direction={weatherData.wind_direction_10m ?? 0} />
                             <p className="text-lg font-semibold">
-                                {windSpeed.toFixed(1)} {windSpeedUnit}
+                                {formatWindSpeed(weatherData.wind_speed_10m)}
                             </p>
                         </div>
                     </div>
                     <div className="text-center">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Precipitation</p>
                         <p className="text-lg font-semibold">
-                            {precipitation.toFixed(2)} {precipitationUnit}
+                            {formatPrecipitation(weatherData.precipitation)}
                         </p>
                     </div>
                 </div>

@@ -29,11 +29,11 @@ const WindChart: React.FC<WindChartProps> = ({
                 const data = await fetchHourlyForecast(latitude, longitude, hours);
                 setWindData(data);
 
-                if (data && data.timestamps) {
+                if (data && data.timestamps && data.wind_speed_10m && data.wind_direction_10m) {
                     const dataToSample = {
                         wind_speed_10m: data.wind_speed_10m,
                         wind_direction_10m: data.wind_direction_10m,
-                        wind_gusts_10m: data.wind_gusts_10m || []
+                        wind_gusts_10m: data.wind_gusts_10m || Array(data.wind_speed_10m.length).fill(0)
                     };
 
                     const sampled = sample12HourData(data.timestamps, dataToSample);
@@ -93,21 +93,25 @@ const WindChart: React.FC<WindChartProps> = ({
                 <div className="text-white">
                     <div className="text-lg font-medium">Current Wind</div>
                     <div className="text-3xl font-bold">
-                        {Math.round(sampledData.wind_speed_10m[0])} km/h
+                        {sampledData.wind_speed_10m[0] !== undefined ? Math.round(sampledData.wind_speed_10m[0]) : 'N/A'} km/h
                     </div>
                     <div className="text-sm text-white/70">
-                        <WindDirectionIndicator
-                            direction={sampledData.wind_direction_10m[0]}
-                            size="md"
-                            className="inline-block mr-2"
-                        />
-                        {getWindDirection(sampledData.wind_direction_10m[0])}
+                        {sampledData.wind_direction_10m[0] !== undefined && (
+                            <>
+                                <WindDirectionIndicator
+                                    direction={sampledData.wind_direction_10m[0]}
+                                    size="md"
+                                    className="inline-block mr-2"
+                                />
+                                {getWindDirection(sampledData.wind_direction_10m[0])}
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="text-white text-right">
                     <div className="text-lg font-medium">Gusts</div>
                     <div className="text-3xl font-bold">
-                        {Math.round(sampledData.wind_gusts_10m[0])} km/h
+                        {sampledData.wind_gusts_10m[0] !== undefined ? Math.round(sampledData.wind_gusts_10m[0]) : 'N/A'} km/h
                     </div>
                 </div>
             </div>
@@ -120,20 +124,20 @@ const WindChart: React.FC<WindChartProps> = ({
                             <div className="mb-1 text-white/70 text-xs truncate w-full text-center">{formatTime(time)}</div>
                             <div className="h-32 sm:h-40 md:h-48 lg:h-56 flex flex-col justify-end items-center w-full">
                                 <WindDirectionIndicator
-                                    direction={sampledData.wind_direction_10m[index]}
+                                    direction={sampledData.wind_direction_10m[index] ?? 0}
                                     size="sm"
                                     className="mb-1"
                                 />
                                 <div
                                     className="w-10 sm:w-12 md:w-16 bg-blue-500/80 rounded-t-sm"
                                     style={{
-                                        height: `${(sampledData.wind_speed_10m[index] / maxWindSpeed) * 100}%`,
+                                        height: `${((sampledData.wind_speed_10m[index] ?? 0) / maxWindSpeed) * 100}%`,
                                         minHeight: '4px'
                                     }}
                                 ></div>
                             </div>
                             <div className="mt-1 text-white text-xs">
-                                {Math.round(sampledData.wind_speed_10m[index])}
+                                {sampledData.wind_speed_10m[index] !== undefined ? Math.round(sampledData.wind_speed_10m[index]) : 'N/A'}
                             </div>
                         </div>
                     ))}
