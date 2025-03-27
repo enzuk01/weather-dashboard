@@ -1,0 +1,43 @@
+{
+    "short_name": "Weather Dashboard",
+    "name": "Weather Dashboard - Real-time Weather App",
+    "description": "A comprehensive weather dashboard application with real-time data and offline mode",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "64x64 32x32 24x24 16x16",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "logo192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "logo512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#2563EB",
+    "background_color": "#1E3A8A",
+    "orientation": "portrait",
+    "scope": "/",
+    "shortcuts": [
+        {
+            "name": "View Current Weather",
+            "short_name": "Current",
+            "description": "View current weather conditions",
+            "url": "/"
+        },
+        {
+            "name": "View Forecast",
+            "short_name": "Forecast",
+            "description": "View weather forecast",
+            "url": "/forecast"
+        }
+    ]
+}

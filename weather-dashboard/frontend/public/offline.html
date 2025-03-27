@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563EB" />
+    <meta name="description" content="Weather Dashboard - Offline" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <title>Weather Dashboard - Offline</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(to bottom, #1E3A8A, #2563EB);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon">⚡</div>
+        <h1>You're Offline</h1>
+        <p>
+            It looks like you've lost your internet connection. Some features of the Weather Dashboard
+            may not be available until you're back online.
+        </p>
+        <p>
+            If you've previously loaded weather data for your location, you may still be able to
+            view it in offline mode.
+        </p>
+        <a href="/" class="btn">Try Again</a>
+    </div>
+    <script>
+        // Check if we're back online and reload the page
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // Add event listener for the "Try Again" button
+        document.querySelector('.btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.reload();
+        });
+    </script>
+</body>
+
+</html>

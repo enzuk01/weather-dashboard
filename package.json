@@ -1,0 +1,30 @@
+{
+    "name": "weather-dashboard",
+    "version": "1.0.0",
+    "description": "Weather Dashboard Application",
+    "scripts": {
+        "start": "cd weather-dashboard/frontend && npm start",
+        "start:backend": "cd weather-dashboard/backend && python3 main.py",
+        "install:frontend": "cd weather-dashboard/frontend && npm install",
+        "install:backend": "cd weather-dashboard/backend && pip3 install -r requirements.txt",
+        "install": "npm run install:frontend && npm run install:backend",
+        "test": "cd weather-dashboard/frontend && npm test"
+    },
+    "keywords": [
+        "weather",
+        "dashboard",
+        "react",
+        "flask",
+        "python"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^8.2.0"
+    },
+    "private": true,
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    }
+}
