@@ -4,12 +4,52 @@
 
 ### Added
 
+- Added interactive weather map with initial implementation:
+  - OpenStreetMap base layer integration
+  - Weather data layer controls (Temperature, Precipitation, Wind, Cloud cover)
+  - Location marker for selected location
+  - Color scale legend for weather data visualization
+- Added map controls for zooming and panning
+- Added layer selection buttons with active state indication
+- Added test fixtures using real API responses for more reliable testing
+- Added utility script for capturing API response fixtures
+- Added improved error handling in weather service tests
+- Added test data strategy documentation
+
 ### Changed
+
+- Improved dark mode implementation with smooth transitions
+- Enhanced theme toggle with ripple effect and dynamic glow
+- Improved CurrentWeatherDisplay component with responsive layout and unit conversions
+- Enhanced error handling with detailed logging
+- Improved backend stability monitoring
+- Updated mock weather service to include all required fields
+- Improved sunrise/sunset data handling using actual forecast timestamps
+- Enhanced performance metrics display in status report
+- Moved fixture capture script to dedicated scripts directory
+- Updated test cases to use real API response data
+- Improved error handling consistency across services
 
 ### Fixed
 
+- Fixed marker icon display on the weather map
+- Fixed map container sizing and responsiveness
+- Fixed logger initialization issues
+- Fixed performance metric type mismatches
+- Fixed missing fields in weather data interfaces
+- Fixed backend health check endpoint
+- Fixed memory usage monitoring
+- Fixed error handling in logger context
+- Fixed test failures related to error message handling
+- Fixed port conflict issues with backend server
+- Fixed test suite organization
+
 ### Pending Implementation
 
+- Weather data visualization improvements:
+  - Optimize grid-based weather data points
+  - Improve data point density and coverage
+  - Enhance visualization performance
 - Language translation system
 - Unit conversion real-time updates
 

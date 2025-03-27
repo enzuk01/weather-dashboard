@@ -1,0 +1,18 @@
+{
+  "elevation": 32,
+  "feels_like_temperature": 3.380138460606103,
+  "is_day": 1,
+  "latitude": 40.710335,
+  "longitude": -73.99309,
+  "precipitation": 0,
+  "rain": 0,
+  "relative_humidity_2m": 35,
+  "snowfall": 0,
+  "surface_pressure": 1013.25,
+  "temperature_2m": 4.4,
+  "timestamp": "2025-03-27T09:45:00",
+  "timezone": "America/New_York",
+  "weather_code": 0,
+  "wind_direction_10m": 288,
+  "wind_speed_10m": 18.2
+}

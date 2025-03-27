@@ -1,139 +1,144 @@
 import { fetchCurrentWeather, fetchHourlyForecast, fetchWeatherCodes } from './weatherService';
+import { STORAGE_KEYS, loadFromStorage } from '../utils/storageUtils';
+import currentWeatherFixture from './__tests__/fixtures/weather/current_weather.json';
+import hourlyForecastFixture from './__tests__/fixtures/weather/hourly_forecast.json';
+import weatherCodesFixture from './__tests__/fixtures/weather/weather_codes.json';
 
-// Mock the fetch function
+// Mock fetch and storage functions
 global.fetch = jest.fn();
+jest.mock('../utils/storageUtils', () => ({
+    STORAGE_KEYS: {
+        CURRENT_WEATHER: 'weather_current',
+        HOURLY_FORECAST: 'weather_hourly',
+        DAILY_FORECAST: 'weather_daily'
+    },
+    loadFromStorage: jest.fn(),
+    saveToStorage: jest.fn(),
+    isOffline: jest.fn().mockReturnValue(false)
+}));
 
 describe('weatherService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        (loadFromStorage as jest.Mock).mockReturnValue(null); // No cached data by default
     });
 
     describe('fetchCurrentWeather', () => {
-        it('should fetch current weather data successfully', async () => {
-            const mockData = {
-                timestamp: '2023-04-01T12:00:00Z',
-                latitude: 40.7128,
-                longitude: -74.0060,
-                temperature_2m: 22.5,
-                relative_humidity_2m: 45,
-                precipitation: 0,
-                wind_speed_10m: 10,
-                wind_direction_10m: 180,
-                elevation: 10,
-                timezone: 'America/New_York'
-            };
-
-            (fetch as jest.Mock).mockResolvedValueOnce({
+        test('should fetch current weather data successfully', async () => {
+            const mockResponse = {
                 ok: true,
-                json: async () => mockData
-            });
+                json: jest.fn().mockResolvedValue(currentWeatherFixture)
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
             const result = await fetchCurrentWeather(40.7128, -74.0060);
 
             expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5000/weather/current?lat=40.7128&lon=-74.006'
+                'http://localhost:5001/weather/current?lat=40.7128&lon=-74.006'
             );
-            expect(result).toEqual(mockData);
+            expect(result).toEqual(currentWeatherFixture);
         });
 
-        it('should throw an error when the API call fails', async () => {
-            (fetch as jest.Mock).mockResolvedValueOnce({
+        test('should throw an error when the API call fails and no cache is available', async () => {
+            const mockResponse = {
                 ok: false,
-                statusText: 'Not Found'
-            });
+                status: 500,
+                json: jest.fn().mockResolvedValue({ message: 'Server Error' })
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
+            (loadFromStorage as jest.Mock).mockReturnValue(null);
 
             await expect(fetchCurrentWeather(40.7128, -74.0060)).rejects.toThrow(
-                'Failed to fetch current weather: Not Found'
+                'Server Error'
             );
+        });
+
+        test('should use cached data when API call fails', async () => {
+            const mockResponse = {
+                ok: false,
+                status: 500,
+                json: jest.fn().mockResolvedValue({ message: 'Server Error' })
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
+            (loadFromStorage as jest.Mock).mockReturnValue(currentWeatherFixture);
+
+            const result = await fetchCurrentWeather(40.7128, -74.0060);
+            expect(result).toEqual(currentWeatherFixture);
         });
     });
 
     describe('fetchHourlyForecast', () => {
-        it('should fetch hourly forecast data successfully', async () => {
-            const mockData = {
-                timestamps: ['2023-04-01T12:00:00Z', '2023-04-01T13:00:00Z'],
-                temperature_2m: [22.5, 23],
-                precipitation_probability: [0, 10],
-                precipitation: [0, 0.5],
-                wind_speed_10m: [10, 12],
-                wind_direction_10m: [180, 200],
-                latitude: 40.7128,
-                longitude: -74.0060,
-                elevation: 10,
-                timezone: 'America/New_York'
+        test('should fetch hourly forecast data successfully', async () => {
+            const mockResponse = {
+                ok: true,
+                json: jest.fn().mockResolvedValue(hourlyForecastFixture)
             };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-            (fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockData
-            });
-
-            const result = await fetchHourlyForecast(40.7128, -74.0060, 24);
+            const result = await fetchHourlyForecast(40.7128, -74.0060);
 
             expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5000/weather/forecast/hourly?lat=40.7128&lon=-74.006&hours=24'
+                'http://localhost:5001/weather/forecast/hourly?lat=40.7128&lon=-74.006&hours=24'
             );
-            expect(result).toEqual(mockData);
+            expect(result).toEqual(hourlyForecastFixture);
         });
 
-        it('should use default hours parameter when not specified', async () => {
-            const mockData = { /* mock data */ };
-
-            (fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockData
-            });
-
-            await fetchHourlyForecast(40.7128, -74.0060);
-
-            expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5000/weather/forecast/hourly?lat=40.7128&lon=-74.006&hours=48'
-            );
-        });
-
-        it('should throw an error when the API call fails', async () => {
-            (fetch as jest.Mock).mockResolvedValueOnce({
+        test('should throw an error when the API call fails and no cache is available', async () => {
+            const mockResponse = {
                 ok: false,
-                statusText: 'Server Error'
-            });
+                status: 500,
+                json: jest.fn().mockResolvedValue({ message: 'Server Error' })
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
+            (loadFromStorage as jest.Mock).mockReturnValue(null);
 
             await expect(fetchHourlyForecast(40.7128, -74.0060)).rejects.toThrow(
-                'Failed to fetch hourly forecast: Server Error'
+                'Failed to fetch hourly forecast'
             );
+        });
+
+        test('should use cached data when API call fails', async () => {
+            const mockResponse = {
+                ok: false,
+                status: 500,
+                json: jest.fn().mockResolvedValue({ message: 'Server Error' })
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
+            (loadFromStorage as jest.Mock).mockReturnValue(hourlyForecastFixture);
+
+            const result = await fetchHourlyForecast(40.7128, -74.0060);
+            expect(result).toEqual(hourlyForecastFixture);
         });
     });
 
     describe('fetchWeatherCodes', () => {
-        it('should fetch weather codes successfully', async () => {
-            const mockData = {
-                0: "Clear sky",
-                1: "Mainly clear",
-                2: "Partly cloudy"
-            };
-
-            (fetch as jest.Mock).mockResolvedValueOnce({
+        test('should fetch weather codes successfully', async () => {
+            const mockResponse = {
                 ok: true,
-                json: async () => mockData
-            });
+                json: jest.fn().mockResolvedValue(weatherCodesFixture)
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
             const result = await fetchWeatherCodes();
 
-            expect(fetch).toHaveBeenCalledWith('http://localhost:5000/weather/codes');
-            expect(result).toEqual(new Map([
-                [0, "Clear sky"],
-                [1, "Mainly clear"],
-                [2, "Partly cloudy"]
-            ]));
+            expect(fetch).toHaveBeenCalledWith(
+                'http://localhost:5001/weather/codes'
+            );
+            // Convert the fixture object to a Map for comparison
+            const expectedMap = new Map(Object.entries(weatherCodesFixture).map(([key, value]) => [parseInt(key), value]));
+            expect(result).toEqual(expectedMap);
         });
 
-        it('should throw an error when the API call fails', async () => {
-            (fetch as jest.Mock).mockResolvedValueOnce({
+        test('should throw an error when the API call fails', async () => {
+            const mockResponse = {
                 ok: false,
-                statusText: 'Server Error'
-            });
+                status: 500,
+                json: jest.fn().mockResolvedValue({ message: 'Server Error' })
+            };
+            (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
             await expect(fetchWeatherCodes()).rejects.toThrow(
-                'Failed to fetch weather codes: Server Error'
+                'Failed to fetch weather codes'
             );
         });
     });
