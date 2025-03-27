@@ -4,7 +4,7 @@ import { getWeatherConditionColor, getWeatherCodeColor } from '../utils/weatherC
 export interface WeatherIconProps {
     weatherCode: number;
     isDay: boolean;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
     className?: string;
 }
 
@@ -21,6 +21,14 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({
     size = 'md',
     className = ''
 }) => {
+    const sizeClasses = {
+        'sm': 'w-6 h-6',
+        'md': 'w-8 h-8',
+        'lg': 'w-10 h-10',
+        'xl': 'w-12 h-12',
+        '2xl': 'w-16 h-16'
+    };
+
     // Get the weather emoji based on the code and time of day
     const getWeatherEmoji = (code: number): string => {
         // Clear
@@ -79,6 +87,7 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({
             case 'md': return 'text-3xl';
             case 'lg': return 'text-5xl';
             case 'xl': return 'text-7xl';
+            case '2xl': return 'text-9xl';
             default: return 'text-3xl';
         }
     };
@@ -127,7 +136,7 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({
 
     return (
         <span
-            className={`${getSizeClass()} ${className}`}
+            className={`${getSizeClass()} ${className} ${sizeClasses[size]}`}
             style={{ color: conditionColor }}
             aria-label={`Weather condition: ${emoji}`}
         >

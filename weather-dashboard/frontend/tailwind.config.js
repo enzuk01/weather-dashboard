@@ -70,6 +70,7 @@ module.exports = {
                 'wind': 'wind 10s linear infinite',
                 'rain': 'rain 0.8s linear infinite',
                 'ripple': 'ripple 0.6s linear forwards',
+                'weather-float': 'weather-float 3s ease-in-out infinite'
             },
             keyframes: {
                 fadeIn: {
@@ -96,6 +97,10 @@ module.exports = {
                     '0%': { transform: 'scale(0)', opacity: 1 },
                     '100%': { transform: 'scale(4)', opacity: 0 },
                 },
+                'weather-float': {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-5px)' }
+                }
             },
             boxShadow: {
                 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',

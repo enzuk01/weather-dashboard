@@ -166,6 +166,12 @@ This project is a modern weather dashboard application that showcases the capabi
 
 - 🌤️ **Current Weather**: Real-time weather conditions including temperature, humidity, precipitation, and wind
 - 📅 **Hourly & Daily Forecasts**: Detailed weather predictions for up to 7 days
+- 🗺️ **Weather Map** (Beta):
+  - Interactive map with OpenStreetMap integration
+  - Layer controls for different weather types (temperature, precipitation, wind, clouds)
+  - Location marker for selected location
+  - Color scale legend for weather data visualization
+  - Note: Weather data visualization is currently under development
 - 📱 **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - 🔄 **Auto-Refresh**: Weather data automatically updates at regular intervals
 - 📍 **Location-Based**: Get weather for your current location or search for any place
