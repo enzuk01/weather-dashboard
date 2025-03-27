@@ -11,6 +11,13 @@
 - Enhanced theme toggle with ripple effect and dynamic glow
 - Implemented settings panel with unit conversions and preferences
 - Added ability to customize refresh interval
+- Added settings panel UI with glass-morphism design
+- Integrated settings context for managing user preferences
+- Added temperature unit selection (°C/°F)
+- Added wind speed unit selection (km/h/mph)
+- Added precipitation unit selection (mm/inches)
+- Added refresh interval customization options
+- Added settings persistence using localStorage
 
 ### Fixed
 
@@ -18,6 +25,14 @@
 - Fixed temperature unit conversion not updating the dashboard display when changed in settings
 - Fixed wind speed unit conversion not updating the dashboard display when changed in settings
 - Fixed precipitation unit conversion not updating the dashboard display when changed in settings
+- Fixed settings panel not properly reflecting current theme state
+- Fixed settings panel animation transitions on mount/unmount
+
+### Pending Implementation
+
+- Auto-refresh functionality based on selected interval
+- Language translation system
+- Unit conversion real-time updates
 
 ## [1.1.0] - 2025-03-27
 

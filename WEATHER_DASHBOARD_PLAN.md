@@ -55,10 +55,10 @@
 - [x] Add droplet indicators for precipitation visualization
 - [x] Optimize layout for browser width utilization
 - [-] Develop weather map visualization
-- [-] Create settings panel for user preferences
-- [ ] Add unit conversion (metric/imperial)
+- [x] Create settings panel for user preferences
+- [-] Add unit conversion (metric/imperial)
 - [ ] Implement offline mode with service workers
-- [~] Add multi-language support
+- [-] Add multi-language support
 
 ## Visual Design and UX
 
@@ -103,18 +103,24 @@
 4. ✅ Optimized component layout to use full browser width
 5. ✅ Created restore point with Git version control
 6. ✅ Updated documentation with Git workflows
+7. ✅ Implemented settings panel with theme toggle
+8. ✅ Added refresh interval customization
+9. ✅ Enhanced dark mode support with smooth transitions
 
 ## Next Development Focus (Current Sprint)
 
 1. **UX Enhancements**
-   - [ ] Complete dark mode implementation
-   - [ ] Add theme toggle in the header
-   - [ ] Improve components' color schemes for better accessibility
+   - [x] Complete dark mode implementation
+   - [x] Add theme toggle in the header
+   - [-] Improve components' color schemes for better accessibility
 
 2. **User Preferences**
-   - [ ] Implement the settings panel
-   - [ ] Add unit conversion (°C/°F, km/h/mph, mm/inches)
-   - [ ] Add ability to customize refresh interval
+   - [x] Implement the settings panel
+   - [-] Add unit conversion (°C/°F, km/h/mph, mm/inches)
+   - [x] Add ability to customize refresh interval
+   - [ ] Implement auto-refresh functionality based on user settings
+   - [-] Add language translation support with i18n
+   - [ ] Create language packs for major languages
 
 3. **Data Visualization Improvements**
    - [ ] Add temperature trend line to hourly forecast
@@ -144,6 +150,5 @@
    - [ ] Create install prompt for PWA
 
 3. **Removed Requirements**
-   - [~] Multi-language support
    - [~] Print-friendly layout
    - [~] Cross-browser testing
