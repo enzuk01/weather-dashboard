@@ -186,6 +186,55 @@ This project is a modern weather dashboard application that showcases the capabi
 - **`/frontend`**: React application with the dashboard UI
 - **`/docs`**: Project documentation
 
+## Documentation Maintenance Guidelines
+
+### Regular Documentation Updates
+
+1. **CHANGELOG.md Updates**
+   - Add entries immediately when:
+     - Implementing new features
+     - Fixing bugs
+     - Making significant changes
+     - Modifying user-facing functionality
+   - Keep entries under the [Unreleased] section until a new version is released
+   - Include both technical and user-facing changes
+   - Maintain sections for Added, Changed, Fixed, and Pending Implementation
+
+2. **Development Plan Updates**
+   - Update WEATHER_DASHBOARD_PLAN.md when:
+     - Starting new tasks (mark as [-] In Progress)
+     - Completing tasks (mark as [x] Developed)
+     - Changing task priorities
+     - Adding new requirements
+     - Removing or deferring features
+   - Keep the Completed in Last Sprint section current
+   - Regularly review and update Next Development Focus
+
+3. **Documentation Commit Rules**
+   - Make documentation updates in the same commit as code changes
+   - Use semantic commit prefixes:
+     - `docs:` for documentation-only changes
+     - `feat:` for new features
+     - `fix:` for bug fixes
+     - `refactor:` for code improvements
+     - `style:` for styling changes
+     - `test:` for test additions/modifications
+   - Include detailed commit messages explaining why changes were made
+
+4. **Version Control Best Practices**
+   - Commit documentation changes alongside related code
+   - Create restore points before major changes
+   - Push documentation updates to remote repository daily
+   - Review documentation during code review process
+   - Keep README.md updated with new features and changes
+
+5. **Quality Checks**
+   - Verify all code examples are current and working
+   - Ensure documentation reflects the actual codebase
+   - Check for broken links and outdated references
+   - Maintain consistent formatting and style
+   - Update installation and setup instructions as dependencies change
+
 ## Version Control with Git
 
 The project uses Git for version control. Here are the key commands for working with the repository:
