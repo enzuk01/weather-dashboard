@@ -11,7 +11,7 @@ import Header from './components/Header';
 import GlassCard from './components/ui/GlassCard';
 import OfflineIndicator from './components/ui/OfflineIndicator';
 import ErrorBoundary from './components/ErrorBoundary';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { fetchHourlyForecast } from './services/weatherService';
 import { HourlyForecastData } from './types/weatherTypes';
@@ -24,6 +24,7 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
     const [hourlyData, setHourlyData] = useState<HourlyForecastData | null>(null);
     const [precipLoading, setPrecipLoading] = useState<boolean>(true);
     const [precipError, setPrecipError] = useState<string | null>(null);
+    const { isDark } = useTheme();
 
     // Sample data for sunrise/sunset (would come from API in production)
     const sunriseSunsetData = {
@@ -97,7 +98,7 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
     };
 
     return (
-        <div className="p-2 sm:p-3 md:p-4">
+        <div className={`p-2 sm:p-3 md:p-4 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
             <div className="w-full">
                 <div className="mb-4">
                     <ErrorBoundary>
@@ -131,7 +132,7 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
                     <div className="lg:col-span-2">
                         <ErrorBoundary>
                             <GlassCard className="p-3 md:p-4 h-full">
-                                <h2 className="text-xl font-semibold text-white mb-3 md:mb-4">Sunrise & Sunset</h2>
+                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Sunrise & Sunset</h2>
                                 <SunriseSunsetChart
                                     sunrise={sunriseSunsetData.sunrise}
                                     sunset={sunriseSunsetData.sunset}
@@ -146,7 +147,7 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
                 <div className="mt-3 md:mt-4 space-y-3 md:space-y-4">
                     <ErrorBoundary>
                         <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className="text-xl font-semibold text-white mb-3 md:mb-4">24-Hour Forecast</h2>
+                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>24-Hour Forecast</h2>
                             <HourlyForecastCards
                                 latitude={location.latitude}
                                 longitude={location.longitude}
@@ -156,14 +157,14 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
 
                     <ErrorBoundary>
                         <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className="text-xl font-semibold text-white mb-3 md:mb-4">Precipitation</h2>
+                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Precipitation</h2>
                             {renderPrecipitationChart()}
                         </GlassCard>
                     </ErrorBoundary>
 
                     <ErrorBoundary>
                         <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className="text-xl font-semibold text-white mb-3 md:mb-4">Wind</h2>
+                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Wind</h2>
                             <WindChart
                                 latitude={location.latitude}
                                 longitude={location.longitude}
@@ -173,7 +174,7 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
 
                     <ErrorBoundary>
                         <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className="text-xl font-semibold text-white mb-3 md:mb-4">7-Day Forecast</h2>
+                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>7-Day Forecast</h2>
                             <DailyForecastCards
                                 latitude={location.latitude}
                                 longitude={location.longitude}
@@ -198,26 +199,43 @@ function App() {
 
     // Create a modified version of DashboardContent that receives the location state
     const ModifiedDashboardContent = () => {
-        // Render the original DashboardContent with location state
         return <DashboardContent location={location} onLocationChange={setLocation} />;
     };
 
     return (
         <ThemeProvider>
-            <SettingsProvider>
-                <div className="min-h-screen bg-gradient-to-b from-blue-800 to-blue-600 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
-                    <Header
-                        title="Weather Dashboard"
-                        locationName={location.name}
-                        onSettingsClick={() => { }}
-                    />
-                    <ErrorBoundary>
-                        <ModifiedDashboardContent />
-                    </ErrorBoundary>
-                </div>
-            </SettingsProvider>
+            <AppBackground>
+                <SettingsProvider>
+                    <div className="min-h-screen flex flex-col">
+                        <Header
+                            title="Weather Dashboard"
+                            locationName={`${location.name}, ${location.country}`}
+                            onSettingsClick={() => { }}
+                        />
+                        <main className="flex-grow">
+                            <ModifiedDashboardContent />
+                        </main>
+                    </div>
+                </SettingsProvider>
+            </AppBackground>
         </ThemeProvider>
     );
 }
+
+// Background component that changes based on the theme
+const AppBackground: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isDark } = useTheme();
+
+    return (
+        <div className={`
+            min-h-screen transition-all duration-500 ease-in-out
+            ${isDark
+                ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900'
+                : 'bg-gradient-to-br from-blue-500 via-blue-400 to-blue-600'}
+        `}>
+            {children}
+        </div>
+    );
+};
 
 export default App;

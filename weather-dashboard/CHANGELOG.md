@@ -6,6 +6,9 @@
 
 - Added Husky pre-commit hook to remind about updating CHANGELOG
 - Enhanced "Feels Like" temperature display with visual indicators and descriptions
+- Improved dark mode implementation with smooth transitions and animations
+- Added responsive background that adjusts to theme changes
+- Enhanced theme toggle with ripple effect and dynamic glow
 
 ### Fixed
 

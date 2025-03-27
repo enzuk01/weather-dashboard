@@ -69,6 +69,7 @@ module.exports = {
                 'float': 'float 3s ease-in-out infinite',
                 'wind': 'wind 10s linear infinite',
                 'rain': 'rain 0.8s linear infinite',
+                'ripple': 'ripple 0.6s linear forwards',
             },
             keyframes: {
                 fadeIn: {
@@ -91,6 +92,10 @@ module.exports = {
                     '0%': { transform: 'translateY(0)' },
                     '100%': { transform: 'translateY(20px)', opacity: 0 },
                 },
+                ripple: {
+                    '0%': { transform: 'scale(0)', opacity: 1 },
+                    '100%': { transform: 'scale(4)', opacity: 0 },
+                },
             },
             boxShadow: {
                 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
@@ -99,6 +104,10 @@ module.exports = {
             dropShadow: {
                 'glow': '0 0 6px rgba(254, 240, 138, 0.7)',
                 'glow-blue': '0 0 6px rgba(96, 165, 250, 0.7)',
+            },
+            transitionDuration: {
+                '1500': '1500ms',
+                '2000': '2000ms',
             },
         },
     },
