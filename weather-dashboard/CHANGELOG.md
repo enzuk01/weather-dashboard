@@ -9,6 +9,8 @@
 - Improved dark mode implementation with smooth transitions and animations
 - Added responsive background that adjusts to theme changes
 - Enhanced theme toggle with ripple effect and dynamic glow
+- Implemented settings panel with unit conversions and preferences
+- Added ability to customize refresh interval
 
 ### Fixed
 

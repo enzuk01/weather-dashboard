@@ -17,6 +17,7 @@ import { fetchHourlyForecast } from './services/weatherService';
 import { HourlyForecastData } from './types/weatherTypes';
 import LoadingState from './components/ui/LoadingState';
 import ErrorState from './components/ui/ErrorState';
+import SettingsPanel from './components/SettingsPanel';
 
 // Main app content separated to use the settings context
 const DashboardContent = ({ location, onLocationChange }: { location: Location; onLocationChange: (location: Location) => void }) => {
@@ -98,92 +99,110 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
     };
 
     return (
-        <div className={`p-2 sm:p-3 md:p-4 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
-            <div className="w-full">
-                <div className="mb-4">
-                    <ErrorBoundary>
-                        <GlassCard className="p-3 md:p-4">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div className="w-full md:w-1/2">
-                                    <LocationSearch onLocationSelect={handleLocationChange} />
-                                </div>
-                                <div className="w-full md:w-1/2">
-                                    <FavoriteLocations
-                                        onLocationSelect={handleLocationChange}
-                                        currentLocation={location}
-                                    />
-                                </div>
-                            </div>
-                        </GlassCard>
-                    </ErrorBoundary>
-                </div>
+        <>
+            {/* Settings Modal */}
+            <SettingsPanel
+                isOpen={isSettingsOpen}
+                onClose={closeSettings}
+                temperatureUnit={temperatureUnit}
+                setTemperatureUnit={setTemperatureUnit}
+                windSpeedUnit={windSpeedUnit}
+                setWindSpeedUnit={setWindSpeedUnit}
+                precipitationUnit={precipitationUnit}
+                setPrecipitationUnit={setPrecipitationUnit}
+                language={language}
+                setLanguage={setLanguage}
+                refreshInterval={refreshInterval}
+                setRefreshInterval={setRefreshInterval}
+            />
 
-                <div className="mt-3 md:mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
-                    <div className="lg:col-span-1">
+            <div className={`p-2 sm:p-3 md:p-4 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
+                <div className="w-full">
+                    <div className="mb-4">
                         <ErrorBoundary>
-                            <GlassCard className="p-3 md:p-4 h-full">
-                                <CurrentWeatherDisplay
+                            <GlassCard className="p-3 md:p-4">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div className="w-full md:w-1/2">
+                                        <LocationSearch onLocationSelect={handleLocationChange} />
+                                    </div>
+                                    <div className="w-full md:w-1/2">
+                                        <FavoriteLocations
+                                            onLocationSelect={handleLocationChange}
+                                            currentLocation={location}
+                                        />
+                                    </div>
+                                </div>
+                            </GlassCard>
+                        </ErrorBoundary>
+                    </div>
+
+                    <div className="mt-3 md:mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
+                        <div className="lg:col-span-1">
+                            <ErrorBoundary>
+                                <GlassCard className="p-3 md:p-4 h-full">
+                                    <CurrentWeatherDisplay
+                                        latitude={location.latitude}
+                                        longitude={location.longitude}
+                                    />
+                                </GlassCard>
+                            </ErrorBoundary>
+                        </div>
+                        <div className="lg:col-span-2">
+                            <ErrorBoundary>
+                                <GlassCard className="p-3 md:p-4 h-full">
+                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Sunrise & Sunset</h2>
+                                    <SunriseSunsetChart
+                                        sunrise={sunriseSunsetData.sunrise}
+                                        sunset={sunriseSunsetData.sunset}
+                                        currentTime={sunriseSunsetData.currentTime}
+                                    />
+                                </GlassCard>
+                            </ErrorBoundary>
+                        </div>
+                    </div>
+
+                    {/* Full-width components stacked vertically */}
+                    <div className="mt-3 md:mt-4 space-y-3 md:space-y-4">
+                        <ErrorBoundary>
+                            <GlassCard className="p-3 md:p-4 w-full">
+                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>24-Hour Forecast</h2>
+                                <HourlyForecastCards
+                                    latitude={location.latitude}
+                                    longitude={location.longitude}
+                                />
+                            </GlassCard>
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <GlassCard className="p-3 md:p-4 w-full">
+                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Precipitation</h2>
+                                {renderPrecipitationChart()}
+                            </GlassCard>
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <GlassCard className="p-3 md:p-4 w-full">
+                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Wind</h2>
+                                <WindChart
+                                    latitude={location.latitude}
+                                    longitude={location.longitude}
+                                />
+                            </GlassCard>
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <GlassCard className="p-3 md:p-4 w-full">
+                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>7-Day Forecast</h2>
+                                <DailyForecastCards
                                     latitude={location.latitude}
                                     longitude={location.longitude}
                                 />
                             </GlassCard>
                         </ErrorBoundary>
                     </div>
-                    <div className="lg:col-span-2">
-                        <ErrorBoundary>
-                            <GlassCard className="p-3 md:p-4 h-full">
-                                <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Sunrise & Sunset</h2>
-                                <SunriseSunsetChart
-                                    sunrise={sunriseSunsetData.sunrise}
-                                    sunset={sunriseSunsetData.sunset}
-                                    currentTime={sunriseSunsetData.currentTime}
-                                />
-                            </GlassCard>
-                        </ErrorBoundary>
-                    </div>
-                </div>
-
-                {/* Full-width components stacked vertically */}
-                <div className="mt-3 md:mt-4 space-y-3 md:space-y-4">
-                    <ErrorBoundary>
-                        <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>24-Hour Forecast</h2>
-                            <HourlyForecastCards
-                                latitude={location.latitude}
-                                longitude={location.longitude}
-                            />
-                        </GlassCard>
-                    </ErrorBoundary>
-
-                    <ErrorBoundary>
-                        <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Precipitation</h2>
-                            {renderPrecipitationChart()}
-                        </GlassCard>
-                    </ErrorBoundary>
-
-                    <ErrorBoundary>
-                        <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>Wind</h2>
-                            <WindChart
-                                latitude={location.latitude}
-                                longitude={location.longitude}
-                            />
-                        </GlassCard>
-                    </ErrorBoundary>
-
-                    <ErrorBoundary>
-                        <GlassCard className="p-3 md:p-4 w-full">
-                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-white'} mb-3 md:mb-4`}>7-Day Forecast</h2>
-                            <DailyForecastCards
-                                latitude={location.latitude}
-                                longitude={location.longitude}
-                            />
-                        </GlassCard>
-                    </ErrorBoundary>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
@@ -202,16 +221,24 @@ function App() {
         return <DashboardContent location={location} onLocationChange={setLocation} />;
     };
 
+    const HeaderWithSettings = () => {
+        const { openSettings } = useSettings();
+
+        return (
+            <Header
+                title="Weather Dashboard"
+                locationName={`${location.name}, ${location.country}`}
+                onSettingsClick={openSettings}
+            />
+        );
+    };
+
     return (
         <ThemeProvider>
             <AppBackground>
                 <SettingsProvider>
                     <div className="min-h-screen flex flex-col">
-                        <Header
-                            title="Weather Dashboard"
-                            locationName={`${location.name}, ${location.country}`}
-                            onSettingsClick={() => { }}
-                        />
+                        <HeaderWithSettings />
                         <main className="flex-grow">
                             <ModifiedDashboardContent />
                         </main>
