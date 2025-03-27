@@ -186,6 +186,100 @@ This project is a modern weather dashboard application that showcases the capabi
 - **`/frontend`**: React application with the dashboard UI
 - **`/docs`**: Project documentation
 
+## Version Control with Git
+
+The project uses Git for version control. Here are the key commands for working with the repository:
+
+### Restoring to a Previous Version
+
+The project has a stable restore point tagged as `v1.0-stable`. To restore your project to this version:
+
+```bash
+# View available tags
+git tag -l
+
+# Restore to the stable version
+git checkout v1.0-stable
+```
+
+This will put your project in a "detached HEAD" state. If you want to make changes from this point:
+
+```bash
+# Create a new branch from the stable point
+git checkout -b my-new-feature v1.0-stable
+```
+
+### Committing Changes
+
+To save your changes to Git:
+
+```bash
+# Check which files have changed
+git status
+
+# Stage specific files
+git add file1.tsx file2.ts
+
+# Stage all changed files
+git add .
+
+# Commit the changes with a descriptive message
+git commit -m "Brief description of the changes made"
+```
+
+### Working with Branches
+
+Branches let you work on features or fixes without affecting the main codebase:
+
+```bash
+# Create a new branch for a feature
+git checkout -b feature/new-weather-component
+
+# Switch between branches
+git checkout main
+git checkout feature/new-weather-component
+
+# List all branches
+git branch
+```
+
+### Merging Changes
+
+After completing work on a branch, merge it back to the main branch:
+
+```bash
+# First, switch to the destination branch
+git checkout main
+
+# Merge your feature branch into main
+git merge feature/new-weather-component
+
+# If there are conflicts, resolve them, then:
+git add .
+git commit -m "Resolved merge conflicts"
+```
+
+### Common Git Workflows
+
+For a new feature:
+
+1. `git checkout main` - Start from the main branch
+2. `git pull` - Get the latest changes
+3. `git checkout -b feature/name` - Create a feature branch
+4. Make your changes
+5. `git add .` && `git commit -m "Description"` - Save changes
+6. `git push -u origin feature/name` - Push to remote
+7. Create a pull request (if using GitHub)
+8. `git checkout main` && `git merge feature/name` - Merge locally
+
+For a hotfix:
+
+1. `git checkout v1.0-stable` - Start from the stable version
+2. `git checkout -b hotfix/issue` - Create a hotfix branch
+3. Fix the issue
+4. `git add .` && `git commit -m "Fixed issue"` - Save changes
+5. `git checkout main` && `git merge hotfix/issue` - Merge to main
+
 ## Getting Started
 
 ### Prerequisites
