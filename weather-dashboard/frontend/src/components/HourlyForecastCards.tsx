@@ -7,7 +7,7 @@ import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
 import { sample12HourData, formatLocalTime } from '../utils/timeUtils';
-import { useSettings, convertTemperature } from '../contexts/SettingsContext';
+import { useSettings, convertTemperature, convertWindSpeed, convertPrecipitation } from '../contexts/SettingsContext';
 
 interface HourlyForecastCardsProps {
     latitude: number;
@@ -24,7 +24,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
     const [sampledData, setSampledData] = useState<HourlyForecastData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { temperatureUnit } = useSettings();
+    const { temperatureUnit, windSpeedUnit, precipitationUnit } = useSettings();
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -130,6 +130,18 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
         return `${Math.round(temp)}°${temperatureUnit === 'celsius' ? 'C' : 'F'}`;
     };
 
+    // Format wind speed with unit
+    const formatWindSpeed = (kph: number): string => {
+        const speed = convertWindSpeed(kph, 'kph', windSpeedUnit);
+        return `${Math.round(speed)} ${windSpeedUnit}`;
+    };
+
+    // Format precipitation with unit
+    const formatPrecipitation = (mm: number): string => {
+        const amount = convertPrecipitation(mm, 'mm', precipitationUnit);
+        return `${amount.toFixed(1)}${precipitationUnit}`;
+    };
+
     if (loading) {
         return <LoadingState message="Loading hourly forecast..." />;
     }
@@ -195,7 +207,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
                                                 {formatTemperature(sampledData.temperature_2m[index])}
                                             </div>
                                             <div className="flex items-center justify-center gap-1 text-white/70 text-xs">
-                                                <span>{Math.round(sampledData.wind_speed_10m[index])} km/h</span>
+                                                <span>{formatWindSpeed(sampledData.wind_speed_10m[index])}</span>
                                                 <WindDirectionIndicator
                                                     direction={sampledData.wind_direction_10m[index]}
                                                     size="sm"
@@ -204,7 +216,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
                                             <div className="mt-1 text-xs text-white/70">
                                                 {sampledData.precipitation_probability[index]}%
                                                 <span className="mx-1">·</span>
-                                                {sampledData.precipitation[index].toFixed(1)}mm
+                                                {formatPrecipitation(sampledData.precipitation[index])}
                                             </div>
                                         </div>
                                     </div>

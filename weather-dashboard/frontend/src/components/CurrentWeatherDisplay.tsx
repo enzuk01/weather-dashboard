@@ -6,7 +6,7 @@ import LoadingState from './ui/LoadingState';
 import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
-import { useSettings, convertTemperature } from '../contexts/SettingsContext';
+import { useSettings, convertTemperature, convertWindSpeed, convertPrecipitation } from '../contexts/SettingsContext';
 
 interface CurrentWeatherDisplayProps {
     latitude: number;
@@ -17,7 +17,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
     const [weatherData, setWeatherData] = useState<CurrentWeatherData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { temperatureUnit } = useSettings();
+    const { temperatureUnit, windSpeedUnit, precipitationUnit } = useSettings();
 
     useEffect(() => {
         const fetchWeather = async () => {
@@ -123,6 +123,18 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
         return `${Math.round(temp)}°${temperatureUnit === 'celsius' ? 'C' : 'F'}`;
     };
 
+    // Format wind speed with unit
+    const formatWindSpeed = (kph: number): string => {
+        const speed = convertWindSpeed(kph, 'kph', windSpeedUnit);
+        return `${Math.round(speed)} ${windSpeedUnit}`;
+    };
+
+    // Format precipitation with unit
+    const formatPrecipitation = (mm: number): string => {
+        const amount = convertPrecipitation(mm, 'mm', precipitationUnit);
+        return `${amount.toFixed(1)} ${precipitationUnit}`;
+    };
+
     if (loading) {
         return <LoadingState message="Loading current weather data..." />;
     }
@@ -194,7 +206,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
                             <div className="flex items-center">
                                 <span className="text-white/80 text-sm mr-2">Precipitation:</span>
                                 <span className="text-white font-medium">
-                                    {weatherData.precipitation.toFixed(1)} mm
+                                    {formatPrecipitation(weatherData.precipitation)}
                                 </span>
                             </div>
                         </div>
@@ -206,7 +218,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
                             <div className="flex items-center mr-6">
                                 <span className="text-white/80 text-sm mr-2">Wind:</span>
                                 <span className="text-white font-medium">
-                                    {Math.round(weatherData.wind_speed_10m)} km/h
+                                    {formatWindSpeed(weatherData.wind_speed_10m)}
                                 </span>
                                 <WindDirectionIndicator
                                     direction={weatherData.wind_direction_10m}

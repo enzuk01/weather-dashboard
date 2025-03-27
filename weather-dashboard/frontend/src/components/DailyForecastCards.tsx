@@ -6,7 +6,7 @@ import LoadingState from './ui/LoadingState';
 import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
-import { useSettings, convertTemperature } from '../contexts/SettingsContext';
+import { useSettings, convertTemperature, convertWindSpeed } from '../contexts/SettingsContext';
 
 interface DailyForecastCardsProps {
     latitude: number;
@@ -22,7 +22,7 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
     const [forecastData, setForecastData] = useState<DailyForecastData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { temperatureUnit } = useSettings();
+    const { temperatureUnit, windSpeedUnit } = useSettings();
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -56,6 +56,12 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
     const formatTemperature = (celsius: number): string => {
         const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
         return `${Math.round(temp)}°`;
+    };
+
+    // Format wind speed with unit
+    const formatWindSpeed = (kph: number): string => {
+        const speed = convertWindSpeed(kph, 'kph', windSpeedUnit);
+        return `${Math.round(speed)}`;
     };
 
     if (loading) {
@@ -114,7 +120,7 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
                                     direction={forecastData.wind_direction_10m_dominant[index]}
                                     size="sm"
                                 />
-                                <span className="ml-1">{Math.round(forecastData.wind_speed_10m_max[index])}</span>
+                                <span className="ml-1">{formatWindSpeed(forecastData.wind_speed_10m_max[index])}</span>
                             </div>
                             <div>
                                 <span>{Math.round(forecastData.precipitation_probability_max[index])}%</span>
