@@ -15,6 +15,7 @@
 ### Fixed
 
 - Fixed WindDirectionIndicator test TypeScript error by using object syntax for style assertions
+- Fixed temperature unit conversion not updating the dashboard display when changed in settings
 
 ## [1.1.0] - 2025-03-27
 
