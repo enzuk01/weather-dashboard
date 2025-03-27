@@ -335,6 +335,88 @@ For a hotfix:
 4. `git add .` && `git commit -m "Fixed issue"` - Save changes
 5. `git checkout main` && `git merge hotfix/issue` - Merge to main
 
+### Branch Protection Rules
+
+The main branch is protected to ensure code quality and maintain a stable codebase. The following rules are enforced:
+
+1. **No Direct Pushes**: All changes must be made through pull requests
+2. **Required Reviews**: Pull requests require at least one approval
+3. **Up-to-Date Branches**: Pull requests must be up to date with the main branch
+4. **No Force Pushes**: Force pushes to main are not allowed
+5. **Stale Review Dismissal**: New commits will dismiss existing pull request approvals
+
+To contribute changes:
+
+1. Create a feature branch from main
+2. Make your changes and push to the feature branch
+3. Create a pull request targeting main
+4. Get required approvals
+5. Ensure branch is up to date
+6. Merge the pull request
+
+### Release Process
+
+To create a new release:
+
+1. **Prepare Release Branch**:
+
+   ```bash
+   git checkout main
+   git pull
+   git checkout -b release/v1.x.x
+   ```
+
+2. **Update Version Numbers**:
+   - Update version in `package.json`
+   - Update version in `pyproject.toml`
+   - Update CHANGELOG.md
+
+3. **Create Pull Request**:
+   - Create PR from `release/v1.x.x` to `main`
+   - Get required approvals
+   - Merge the PR
+
+4. **Create Release Tag**:
+
+   ```bash
+   git checkout main
+   git pull
+   git tag -a v1.x.x -m "Release v1.x.x"
+   git push origin v1.x.x
+   ```
+
+5. **Create GitHub Release**:
+   - Go to GitHub Releases
+   - Click "Draft a new release"
+   - Choose the tag
+   - Add release notes from CHANGELOG.md
+   - Publish release
+
+### Hotfix Process
+
+For urgent fixes to production:
+
+1. **Create Hotfix Branch**:
+
+   ```bash
+   git checkout main
+   git checkout -b hotfix/issue-description
+   ```
+
+2. **Make and Test Fix**:
+   - Make minimal required changes
+   - Test thoroughly
+   - Update CHANGELOG.md
+
+3. **Create Pull Request**:
+   - Create PR targeting main
+   - Mark as hotfix in description
+   - Get expedited review
+   - Merge after approval
+
+4. **Create Patch Release**:
+   - Follow release process with patch version increment (x.x.1)
+
 ## Getting Started
 
 ### Prerequisites
