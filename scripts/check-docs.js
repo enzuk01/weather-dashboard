@@ -12,8 +12,8 @@ const REQUIRED_FILES = [
 const CHANGELOG_SECTIONS = [
     '## [Unreleased]',
     '### Added',
-    '### Fixed',
     '### Changed',
+    '### Fixed',
     '### Pending Implementation'
 ];
 
@@ -43,55 +43,92 @@ function checkSections(content, requiredSections, fileName) {
     }
 }
 
+function validateChangelogSection(section, sectionName) {
+    const lines = section.split('\n').filter(line => line.trim());
+
+    // Check if section has any content
+    if (lines.length === 0) {
+        return `Section "${sectionName}" is empty`;
+    }
+
+    // Check if all entries start with "-"
+    const invalidEntries = lines.filter(line => !line.trim().startsWith('-'));
+    if (invalidEntries.length > 0) {
+        return `Section "${sectionName}" contains invalid entries. All entries must start with "-":\n${invalidEntries.map(line => `   ${line}`).join('\n')}`;
+    }
+
+    return null;
+}
+
 function checkChangelogFormat(content) {
     // Normalize line endings and trim content
     const normalizedContent = content.replace(/\r\n/g, '\n').trim();
 
-    // Check if [Unreleased] section exists
-    if (!normalizedContent.includes('## [Unreleased]')) {
-        console.error('❌ [Unreleased] section is missing in CHANGELOG.md');
+    // Check if file starts with the correct header
+    if (!normalizedContent.startsWith('# Weather Dashboard Changelog')) {
+        console.error('❌ CHANGELOG.md must start with "# Weather Dashboard Changelog"');
+        process.exit(1);
+    }
+
+    // Check if [Unreleased] section exists and is the first section
+    const firstSectionMatch = normalizedContent.match(/^# Weather Dashboard Changelog\n+## \[([^\]]+)\]/m);
+    if (!firstSectionMatch || firstSectionMatch[1] !== 'Unreleased') {
+        console.error('❌ First section after the title must be "## [Unreleased]"');
         process.exit(1);
     }
 
     // Extract the [Unreleased] section
-    const unreleasedMatch = normalizedContent.match(/## \[Unreleased\]([\s\S]*?)(?=##|$)/);
+    const unreleasedMatch = normalizedContent.match(/## \[Unreleased\]([\s\S]*?)(?=\n## \[|$)/);
     if (!unreleasedMatch) {
-        console.error('❌ Unable to parse [Unreleased] section in CHANGELOG.md');
+        console.error('❌ Unable to parse [Unreleased] section');
         process.exit(1);
     }
 
     const unreleasedContent = unreleasedMatch[1].trim();
+    const sections = {
+        'Added': null,
+        'Changed': null,
+        'Fixed': null,
+        'Pending Implementation': null
+    };
 
-    // Check for required subsections
-    const requiredSections = ['### Added', '### Changed', '### Fixed', '### Pending Implementation'];
-    const missingSections = requiredSections.filter(section => !unreleasedContent.includes(section));
-
-    if (missingSections.length > 0) {
-        console.error('❌ [Unreleased] section is missing required subsections in CHANGELOG.md:');
-        missingSections.forEach(section => console.error(`   - ${section}`));
-        process.exit(1);
-    }
-
-    // Check if each section has content
-    const sections = unreleasedContent.split('###').slice(1);
-    const emptySections = sections.filter(section => {
-        const [title, ...content] = section.split('\n');
-        return content.join('\n').trim().length === 0;
+    // Extract each subsection with more lenient whitespace handling
+    Object.keys(sections).forEach(sectionName => {
+        const sectionRegex = new RegExp(`### ${sectionName}([\\s\\S]*?)(?=### |$)`, 'g');
+        const sectionMatch = sectionRegex.exec(unreleasedContent);
+        if (sectionMatch) {
+            sections[sectionName] = sectionMatch[1].trim();
+        }
     });
 
-    if (emptySections.length > 0) {
-        console.error('❌ The following sections in CHANGELOG.md are empty:');
-        emptySections.forEach(section => {
-            const title = section.split('\n')[0].trim();
-            console.error(`   - ${title}`);
-        });
+    // Validate each section
+    const errors = [];
+    Object.entries(sections).forEach(([name, content]) => {
+        if (!content) {
+            errors.push(`Missing or empty section "### ${name}"`);
+        } else {
+            const validationError = validateChangelogSection(content, name);
+            if (validationError) {
+                errors.push(validationError);
+            }
+        }
+    });
+
+    if (errors.length > 0) {
+        console.error('❌ CHANGELOG.md format errors:');
+        errors.forEach(error => console.error(`   - ${error}`));
         process.exit(1);
     }
 
-    // Check if it's the first section in the file
-    if (!normalizedContent.startsWith('# Weather Dashboard Changelog\n\n## [Unreleased]')) {
-        console.error('❌ [Unreleased] should be the first section after the title in CHANGELOG.md');
-        process.exit(1);
+    // Check for proper spacing between sections
+    const properSpacing = unreleasedContent.split('###').every((section, index) => {
+        if (index === 0) return true; // Skip first split result
+        const trimmed = section.trim();
+        return section.startsWith(' ') && (section.endsWith('\n\n') || section.endsWith('\n'));
+    });
+
+    if (!properSpacing) {
+        console.warn('⚠️ Consider adding consistent spacing between sections in CHANGELOG.md');
     }
 }
 
@@ -123,7 +160,6 @@ try {
 
     // Read and check CHANGELOG.md
     const changelogContent = fs.readFileSync(filePaths['CHANGELOG.md'], 'utf8');
-    checkSections(changelogContent, CHANGELOG_SECTIONS, 'CHANGELOG.md');
     checkChangelogFormat(changelogContent);
     console.log('✅ CHANGELOG.md format is valid');
 

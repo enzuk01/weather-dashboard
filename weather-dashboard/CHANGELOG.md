@@ -4,23 +4,15 @@
 
 ### Added
 
-- Added Husky pre-commit hook to remind about updating CHANGELOG
-- Enhanced "Feels Like" temperature display with visual indicators and descriptions
-- Improved dark mode implementation with smooth transitions and animations
-- Added responsive background that adjusts to theme changes
-- Enhanced theme toggle with ripple effect and dynamic glow
-- Implemented settings panel with unit conversions and preferences
-- Added ability to customize refresh interval
+- Added automated documentation checks with Husky pre-commit hooks
+- Added commitlint for conventional commit message enforcement
+- Added documentation maintenance guidelines to README.md
 - Added settings panel UI with glass-morphism design
-- Integrated settings context for managing user preferences
 - Added temperature unit selection (°C/°F)
 - Added wind speed unit selection (km/h/mph)
 - Added precipitation unit selection (mm/inches)
 - Added refresh interval customization options
 - Added settings persistence using localStorage
-- Added automated documentation checks with Husky pre-commit hooks
-- Added commitlint for conventional commit message enforcement
-- Added documentation maintenance guidelines to README.md
 
 ### Changed
 
@@ -31,12 +23,11 @@
 
 ### Fixed
 
-- Fixed WindDirectionIndicator test TypeScript error by using object syntax for style assertions
-- Fixed temperature unit conversion not updating the dashboard display when changed in settings
-- Fixed wind speed unit conversion not updating the dashboard display when changed in settings
-- Fixed precipitation unit conversion not updating the dashboard display when changed in settings
 - Fixed settings panel not properly reflecting current theme state
 - Fixed settings panel animation transitions on mount/unmount
+- Fixed temperature unit conversion not updating the dashboard display
+- Fixed wind speed unit conversion not updating the dashboard display
+- Fixed precipitation unit conversion not updating the dashboard display
 
 ### Pending Implementation
 
