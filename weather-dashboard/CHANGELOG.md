@@ -31,6 +31,9 @@
 - Improved CurrentWeatherDisplay component with responsive layout and unit conversions
 - Enhanced error handling with detailed logging
 - Improved backend stability monitoring
+- Updated mock weather service to include all required fields
+- Improved sunrise/sunset data handling using actual forecast timestamps
+- Enhanced performance metrics display in status report
 
 ### Fixed
 
@@ -39,6 +42,12 @@
 - Fixed temperature unit conversion not updating the dashboard display
 - Fixed wind speed unit conversion not updating the dashboard display
 - Fixed precipitation unit conversion not updating the dashboard display
+- Fixed logger initialization issues
+- Fixed performance metric type mismatches
+- Fixed missing fields in weather data interfaces
+- Fixed backend health check endpoint
+- Fixed memory usage monitoring
+- Fixed error handling in logger context
 
 ### Pending Implementation
 
