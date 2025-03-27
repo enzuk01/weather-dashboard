@@ -7,14 +7,20 @@ from flask_cors import CORS
 import os
 import json
 from weather_service import get_current_weather, get_hourly_forecast, get_daily_forecast
-import logging
+from dotenv import load_dotenv
 import traceback
+from utils.logger import setup_error_logging, start_memory_logging, logger, performance_monitor
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Load environment variables
+load_dotenv()
 
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Set up error logging and memory monitoring
+setup_error_logging(app)
+start_memory_logging()
 
 # Path to favorites JSON file
 FAVORITES_FILE = os.path.join(os.path.dirname(__file__), 'data', 'favorites.json')
@@ -54,6 +60,34 @@ WEATHER_CODES = {
     99: "Thunderstorm with heavy hail"
 }
 
+@app.before_request
+def before_request():
+    # Log request details
+    logger.info(
+        'Request received - %s %s',
+        request.method,
+        request.path,
+        extra={
+            'query_params': dict(request.args),
+            'headers': dict(request.headers),
+            'remote_addr': request.remote_addr
+        }
+    )
+
+@app.after_request
+def after_request(response):
+    # Log response details
+    logger.info(
+        'Response sent - Status: %s, Size: %s bytes',
+        response.status_code,
+        response.content_length,
+        extra={
+            'path': request.path,
+            'method': request.method
+        }
+    )
+    return response
+
 @app.route('/weather/current', methods=['GET'])
 def current_weather():
     """Get current weather for a location"""
@@ -61,11 +95,15 @@ def current_weather():
         lat = float(request.args.get('lat', 0))
         lon = float(request.args.get('lon', 0))
 
+        logger.debug('Fetching current weather', extra={
+            'latitude': lat,
+            'longitude': lon
+        })
+
         weather_data = get_current_weather(lat, lon)
         return jsonify(weather_data)
     except Exception as e:
-        logging.error(f"Error in current_weather endpoint: {str(e)}")
-        logging.error(traceback.format_exc())
+        logger.exception('Error fetching current weather: %s', str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/weather/forecast/hourly', methods=['GET'])
@@ -76,11 +114,16 @@ def hourly_forecast():
         lon = float(request.args.get('lon', 0))
         hours = int(request.args.get('hours', 24))
 
+        logger.debug('Fetching hourly forecast', extra={
+            'latitude': lat,
+            'longitude': lon,
+            'hours': hours
+        })
+
         forecast_data = get_hourly_forecast(lat, lon, hours)
         return jsonify(forecast_data)
     except Exception as e:
-        logging.error(f"Error in hourly_forecast endpoint: {str(e)}")
-        logging.error(traceback.format_exc())
+        logger.exception('Error fetching hourly forecast: %s', str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/weather/forecast/daily', methods=['GET'])
@@ -91,11 +134,16 @@ def daily_forecast():
         lon = float(request.args.get('lon', 0))
         days = int(request.args.get('days', 7))
 
+        logger.debug('Fetching daily forecast', extra={
+            'latitude': lat,
+            'longitude': lon,
+            'days': days
+        })
+
         forecast_data = get_daily_forecast(lat, lon, days)
         return jsonify(forecast_data)
     except Exception as e:
-        logging.error(f"Error in daily_forecast endpoint: {str(e)}")
-        logging.error(traceback.format_exc())
+        logger.exception('Error fetching daily forecast: %s', str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/weather/codes', methods=['GET'])
@@ -183,8 +231,27 @@ def delete_favorite(index):
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy"})
+    """Health check endpoint that also returns performance metrics"""
+    metrics = performance_monitor.get_metrics()
+    return jsonify({
+        'status': 'healthy',
+        'performance_metrics': metrics
+    })
+
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.warning('404 error: %s', request.url)
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error('500 error: %s\n%s', str(error), traceback.format_exc())
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5003)
+    # Create logs directory if it doesn't exist
+    os.makedirs('logs', exist_ok=True)
+
+    # Start the server
+    port = int(os.getenv('BACKEND_PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=True)

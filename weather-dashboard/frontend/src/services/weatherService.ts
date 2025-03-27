@@ -3,12 +3,15 @@
  * This module handles all interactions with the backend weather API
  */
 
-export type { CurrentWeatherData, HourlyForecastData, DailyForecastData } from '../types/weatherTypes';
+import { logger } from '../utils/logger';
+import { STORAGE_KEYS, saveToStorage, loadFromStorage, isOffline } from '../utils/storageUtils';
 import { CurrentWeatherData, HourlyForecastData, DailyForecastData } from '../types/weatherTypes';
-import { saveToStorage, loadFromStorage, STORAGE_KEYS, isOffline } from '../utils/storageUtils';
 
-// Default to localhost if no API URL is provided
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5003';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+
+interface ApiErrorResponse {
+    message: string;
+}
 
 /**
  * Fetch current weather data for a specific location
@@ -16,52 +19,64 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5003';
  * @param longitude Location longitude
  * @returns Promise with current weather data
  */
-export async function fetchCurrentWeather(latitude: number, longitude: number): Promise<CurrentWeatherData> {
-    // Try to load from storage first if offline
-    if (isOffline()) {
-        const cachedData = loadFromStorage<CurrentWeatherData>(
-            STORAGE_KEYS.CURRENT_WEATHER,
-            latitude,
-            longitude
-        );
+export const fetchCurrentWeather = async (latitude: number, longitude: number): Promise<CurrentWeatherData> => {
+    const metricName = 'fetchCurrentWeather';
+    await logger.startPerformanceMetric(metricName);
 
+    try {
+        // Check cache first
+        const cachedData = loadFromStorage<CurrentWeatherData>(STORAGE_KEYS.CURRENT_WEATHER, latitude, longitude);
         if (cachedData) {
+            await logger.info('Successfully loaded cached weather data');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
-        throw new Error('You are offline and no cached data is available');
-    }
+        // Check if offline
+        if (isOffline()) {
+            await logger.error('Device is offline and no cached data is available');
+            throw new Error('You are offline and no cached data is available');
+        }
 
-    try {
+        // Log API request details
+        await logger.info('Fetching current weather data', { latitude, longitude });
+
         // Fetch fresh data from API
         const response = await fetch(`${API_BASE_URL}/weather/current?lat=${latitude}&lon=${longitude}`);
 
         if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
+            const errorData = await response.json() as ApiErrorResponse;
+            throw new Error(errorData.message || 'Failed to fetch current weather');
         }
 
-        const data = await response.json();
+        const data = await response.json() as CurrentWeatherData;
+
+        // Log successful response
+        await logger.info('Successfully fetched current weather data', { status: response.status });
 
         // Save data to storage for offline use
         saveToStorage(STORAGE_KEYS.CURRENT_WEATHER, data, latitude, longitude);
+        await logger.debug('Saved weather data to local storage');
 
+        await logger.endPerformanceMetric(metricName);
         return data;
     } catch (error) {
-        // If API fetch fails, try to return cached data as fallback
-        const cachedData = loadFromStorage<CurrentWeatherData>(
-            STORAGE_KEYS.CURRENT_WEATHER,
-            latitude,
-            longitude
-        );
+        // Log the error
+        await logger.error('Error fetching current weather', error);
 
+        // Try to use cached data as fallback
+        const cachedData = loadFromStorage<CurrentWeatherData>(STORAGE_KEYS.CURRENT_WEATHER, latitude, longitude);
         if (cachedData) {
+            await logger.info('Using cached data as fallback after API error');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
         // If no cached data, rethrow the error
+        await logger.endPerformanceMetric(metricName);
         throw error;
     }
-}
+};
 
 /**
  * Fetch hourly forecast data for a specific location
@@ -70,58 +85,66 @@ export async function fetchCurrentWeather(latitude: number, longitude: number): 
  * @param hours Number of hours to forecast (default: 24)
  * @returns Promise with hourly forecast data
  */
-export async function fetchHourlyForecast(
-    latitude: number,
-    longitude: number,
-    hours: number = 24
-): Promise<HourlyForecastData> {
-    // Try to load from storage first if offline
-    if (isOffline()) {
-        const cachedData = loadFromStorage<HourlyForecastData>(
-            STORAGE_KEYS.HOURLY_FORECAST,
-            latitude,
-            longitude
-        );
+export const fetchHourlyForecast = async (latitude: number, longitude: number, hours: number = 24): Promise<HourlyForecastData> => {
+    const metricName = 'fetchHourlyForecast';
+    await logger.startPerformanceMetric(metricName);
 
+    try {
+        // Check cache first
+        const cachedData = loadFromStorage<HourlyForecastData>(STORAGE_KEYS.HOURLY_FORECAST, latitude, longitude);
         if (cachedData) {
+            await logger.info('Successfully loaded cached hourly forecast');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
-        throw new Error('You are offline and no cached data is available');
-    }
+        // Check if offline
+        if (isOffline()) {
+            await logger.error('Device is offline and no cached data is available');
+            throw new Error('You are offline and no cached data is available');
+        }
 
-    try {
+        // Log API request details
+        await logger.info('Fetching hourly forecast', { latitude, longitude, hours });
+
         // Fetch fresh data from API
         const response = await fetch(
             `${API_BASE_URL}/weather/forecast/hourly?lat=${latitude}&lon=${longitude}&hours=${hours}`
         );
 
         if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
+            const errorData = await response.json() as ApiErrorResponse;
+            throw new Error(errorData.message || 'Failed to fetch hourly forecast');
         }
 
-        const data = await response.json();
+        const data = await response.json() as HourlyForecastData;
+
+        // Log successful response
+        await logger.info('Successfully fetched hourly forecast', { status: response.status });
 
         // Save data to storage for offline use
         saveToStorage(STORAGE_KEYS.HOURLY_FORECAST, data, latitude, longitude);
+        await logger.debug('Saved hourly forecast to local storage');
 
+        await logger.endPerformanceMetric(metricName);
         return data;
     } catch (error) {
-        // If API fetch fails, try to return cached data as fallback
-        const cachedData = loadFromStorage<HourlyForecastData>(
-            STORAGE_KEYS.HOURLY_FORECAST,
-            latitude,
-            longitude
-        );
+        // Log the error
+        await logger.error('Error fetching hourly forecast', error);
 
+        // Try to use cached data as fallback
+        const cachedData = loadFromStorage<HourlyForecastData>(STORAGE_KEYS.HOURLY_FORECAST, latitude, longitude);
         if (cachedData) {
+            await logger.info('Using cached hourly forecast as fallback after API error');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
         // If no cached data, rethrow the error
+        await logger.endPerformanceMetric(metricName);
         throw error;
     }
-}
+};
 
 /**
  * Fetch daily forecast data for a specific location
@@ -130,58 +153,66 @@ export async function fetchHourlyForecast(
  * @param days Number of days to forecast (default: 7)
  * @returns Promise with daily forecast data
  */
-export async function fetchDailyForecast(
-    latitude: number,
-    longitude: number,
-    days: number = 7
-): Promise<DailyForecastData> {
-    // Try to load from storage first if offline
-    if (isOffline()) {
-        const cachedData = loadFromStorage<DailyForecastData>(
-            STORAGE_KEYS.DAILY_FORECAST,
-            latitude,
-            longitude
-        );
+export const fetchDailyForecast = async (latitude: number, longitude: number, days: number = 7): Promise<DailyForecastData> => {
+    const metricName = 'fetchDailyForecast';
+    await logger.startPerformanceMetric(metricName);
 
+    try {
+        // Check cache first
+        const cachedData = loadFromStorage<DailyForecastData>(STORAGE_KEYS.DAILY_FORECAST, latitude, longitude);
         if (cachedData) {
+            await logger.info('Successfully loaded cached daily forecast');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
-        throw new Error('You are offline and no cached data is available');
-    }
+        // Check if offline
+        if (isOffline()) {
+            await logger.error('Device is offline and no cached data is available');
+            throw new Error('You are offline and no cached data is available');
+        }
 
-    try {
+        // Log API request details
+        await logger.info('Fetching daily forecast', { latitude, longitude, days });
+
         // Fetch fresh data from API
         const response = await fetch(
             `${API_BASE_URL}/weather/forecast/daily?lat=${latitude}&lon=${longitude}&days=${days}`
         );
 
         if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
+            const errorData = await response.json() as ApiErrorResponse;
+            throw new Error(errorData.message || 'Failed to fetch daily forecast');
         }
 
-        const data = await response.json();
+        const data = await response.json() as DailyForecastData;
+
+        // Log successful response
+        await logger.info('Successfully fetched daily forecast', { status: response.status });
 
         // Save data to storage for offline use
         saveToStorage(STORAGE_KEYS.DAILY_FORECAST, data, latitude, longitude);
+        await logger.debug('Saved daily forecast to local storage');
 
+        await logger.endPerformanceMetric(metricName);
         return data;
     } catch (error) {
-        // If API fetch fails, try to return cached data as fallback
-        const cachedData = loadFromStorage<DailyForecastData>(
-            STORAGE_KEYS.DAILY_FORECAST,
-            latitude,
-            longitude
-        );
+        // Log the error
+        await logger.error('Error fetching daily forecast', error);
 
+        // Try to use cached data as fallback
+        const cachedData = loadFromStorage<DailyForecastData>(STORAGE_KEYS.DAILY_FORECAST, latitude, longitude);
         if (cachedData) {
+            await logger.info('Using cached daily forecast as fallback after API error');
+            await logger.endPerformanceMetric(metricName);
             return cachedData;
         }
 
         // If no cached data, rethrow the error
+        await logger.endPerformanceMetric(metricName);
         throw error;
     }
-}
+};
 
 /**
  * Get user's current location

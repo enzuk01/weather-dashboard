@@ -22,8 +22,14 @@ export interface CurrentWeatherData {
     // Rain amount in millimeters
     rain: number;
 
+    // Showers amount in millimeters
+    showers: number;
+
     // Snowfall amount in centimeters
     snowfall: number;
+
+    // Cloud cover in percentage
+    cloud_cover: number;
 
     // Weather condition code according to WMO (World Meteorological Organization)
     weather_code: number;
@@ -58,11 +64,17 @@ export interface HourlyForecastData {
     // Array of precipitation amounts in millimeters
     precipitation: number[];
 
-    // Array of weather condition codes according to WMO
-    weather_code: number[];
+    // Array of rain amounts in millimeters
+    rain: number[];
 
-    // Array of daylight indicators (1 for day, 0 for night)
-    is_day: number[];
+    // Array of showers amounts in millimeters
+    showers: number[];
+
+    // Array of snowfall amounts in centimeters
+    snowfall: number[];
+
+    // Array of cloud cover values in percentage
+    cloud_cover: number[];
 
     // Array of wind speeds at 10 meters above ground in km/h
     wind_speed_10m: number[];
@@ -70,11 +82,17 @@ export interface HourlyForecastData {
     // Array of wind directions at 10 meters above ground in degrees
     wind_direction_10m: number[];
 
+    // Array of wind gust speeds at 10 meters above ground in km/h
+    wind_gusts_10m: number[];
+
     // Array of relative humidity values at 2 meters above ground in percentage
     relative_humidity_2m: number[];
 
-    // Array of wind gust speeds at 10 meters above ground in km/h
-    wind_gusts_10m: number[];
+    // Array of weather condition codes according to WMO
+    weather_code: number[];
+
+    // Array of daylight indicators (1 for day, 0 for night)
+    is_day: number[];
 }
 
 // Daily forecast data
@@ -94,23 +112,14 @@ export interface DailyForecastData {
     // Array of minimum apparent temperatures in degrees Celsius
     apparent_temperature_min: number[];
 
-    // Array of sunrise times
-    sunrise: string[];
-
-    // Array of sunset times
-    sunset: string[];
-
-    // Array of UV index maximum values
-    uv_index_max: number[];
-
     // Array of precipitation sum values in millimeters
     precipitation_sum: number[];
 
     // Array of rain sum values in millimeters
     rain_sum: number[];
 
-    // Array of snowfall sum values in centimeters
-    snowfall_sum: number[];
+    // Array of showers sum values in millimeters
+    showers_sum: number[];
 
     // Array of precipitation probability maximum values in percentage
     precipitation_probability_max: number[];

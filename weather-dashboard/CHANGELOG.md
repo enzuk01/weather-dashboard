@@ -14,6 +14,13 @@
 - Added refresh interval customization options
 - Added settings persistence using localStorage
 - Added auto-refresh functionality based on user settings
+- Added comprehensive logging system for debugging and monitoring
+  - Performance monitoring with metrics collection
+  - Memory usage tracking
+  - API request/response logging
+  - Error tracking with stack traces
+  - Rotating file logs for the backend
+  - Browser console logging for development
 
 ### Changed
 
@@ -22,6 +29,8 @@
 - Improved dark mode implementation with smooth transitions
 - Enhanced theme toggle with ripple effect and dynamic glow
 - Improved CurrentWeatherDisplay component with responsive layout and unit conversions
+- Enhanced error handling with detailed logging
+- Improved backend stability monitoring
 
 ### Fixed
 
