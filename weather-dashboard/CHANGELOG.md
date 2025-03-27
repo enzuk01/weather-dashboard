@@ -18,6 +18,16 @@
 - Added precipitation unit selection (mm/inches)
 - Added refresh interval customization options
 - Added settings persistence using localStorage
+- Added automated documentation checks with Husky pre-commit hooks
+- Added commitlint for conventional commit message enforcement
+- Added documentation maintenance guidelines to README.md
+
+### Changed
+
+- Updated documentation maintenance process with automated checks
+- Enhanced Git workflow with conventional commits
+- Improved dark mode implementation with smooth transitions
+- Enhanced theme toggle with ripple effect and dynamic glow
 
 ### Fixed
 
