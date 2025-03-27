@@ -5,6 +5,7 @@
 - [x] Developed
 - [-] In Progress
 - [ ] Not Started
+- [~] Not Required
 
 ## Project Setup
 
@@ -57,7 +58,7 @@
 - [-] Create settings panel for user preferences
 - [ ] Add unit conversion (metric/imperial)
 - [ ] Implement offline mode with service workers
-- [ ] Add multi-language support
+- [~] Add multi-language support
 
 ## Visual Design and UX
 
@@ -69,7 +70,7 @@
 - [x] Enhanced visualization for precipitation probabilities
 - [-] Implement dark mode support
 - [x] Enhance accessibility features
-- [ ] Create print-friendly layout
+- [~] Create print-friendly layout
 
 ## Documentation and Testing
 
@@ -81,7 +82,7 @@
 - [ ] Implement integration tests
 - [ ] Add user documentation
 - [ ] Create developer guides
-- [ ] Perform cross-browser testing
+- [~] Perform cross-browser testing
 
 ## Performance Optimization
 
@@ -142,7 +143,7 @@
    - [ ] Add local storage for offline access
    - [ ] Create install prompt for PWA
 
-3. **Internationalization**
-   - [ ] Add language selection
-   - [ ] Implement translation system
-   - [ ] Support right-to-left languages
+3. **Removed Requirements**
+   - [~] Multi-language support
+   - [~] Print-friendly layout
+   - [~] Cross-browser testing
