@@ -15,16 +15,33 @@ declare global {
     }
 }
 
-// Mock matchMedia for components that use media queries (like for dark mode)
-window.matchMedia = window.matchMedia || function () {
-    return {
+// Mock the Leaflet library
+jest.mock('leaflet', () => ({
+    map: jest.fn(),
+    marker: jest.fn(),
+    tileLayer: jest.fn(),
+    control: jest.fn(),
+    icon: jest.fn(),
+    Marker: {
+        prototype: {
+            options: {
+                icon: {}
+            }
+        }
+    }
+}));
+
+// Mock matchMedia for components that use media queries
+Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
         matches: false,
-        addListener: function () { },
-        removeListener: function () { },
-        addEventListener: function () { },
-        removeEventListener: function () { },
-        dispatchEvent: function () {
-            return false;
-        },
-    };
-};
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+    })),
+});
