@@ -7,13 +7,29 @@
 - Added automated documentation checks with Husky pre-commit hooks
 - Added commitlint for conventional commit message enforcement
 - Added documentation maintenance guidelines to README.md
-- Added settings panel UI with glass-morphism design
-- Added temperature unit selection (°C/°F)
-- Added wind speed unit selection (km/h/mph)
-- Added precipitation unit selection (mm/inches)
-- Added refresh interval customization options
-- Added settings persistence using localStorage
-- Added auto-refresh functionality based on user settings
+
+### Changed
+
+- Updated documentation maintenance process with automated checks
+- Enhanced Git workflow with conventional commits
+
+### Fixed
+
+- Fixed settings panel not properly reflecting current theme state
+- Fixed settings panel animation transitions on mount/unmount
+- Fixed temperature unit conversion not updating the dashboard display
+- Fixed wind speed unit conversion not updating the dashboard display
+- Fixed precipitation unit conversion not updating the dashboard display
+
+### Pending Implementation
+
+- Language translation system
+- Unit conversion real-time updates
+
+## [1.2.0] - 2025-03-27
+
+### Added
+
 - Added comprehensive logging system for debugging and monitoring
   - Performance monitoring with metrics collection
   - Memory usage tracking
@@ -21,11 +37,16 @@
   - Error tracking with stack traces
   - Rotating file logs for the backend
   - Browser console logging for development
+- Added settings panel UI with glass-morphism design
+- Added temperature unit selection (°C/°F)
+- Added wind speed unit selection (km/h/mph)
+- Added precipitation unit selection (mm/inches)
+- Added refresh interval customization options
+- Added settings persistence using localStorage
+- Added auto-refresh functionality based on user settings
 
 ### Changed
 
-- Updated documentation maintenance process with automated checks
-- Enhanced Git workflow with conventional commits
 - Improved dark mode implementation with smooth transitions
 - Enhanced theme toggle with ripple effect and dynamic glow
 - Improved CurrentWeatherDisplay component with responsive layout and unit conversions
@@ -37,22 +58,12 @@
 
 ### Fixed
 
-- Fixed settings panel not properly reflecting current theme state
-- Fixed settings panel animation transitions on mount/unmount
-- Fixed temperature unit conversion not updating the dashboard display
-- Fixed wind speed unit conversion not updating the dashboard display
-- Fixed precipitation unit conversion not updating the dashboard display
 - Fixed logger initialization issues
 - Fixed performance metric type mismatches
 - Fixed missing fields in weather data interfaces
 - Fixed backend health check endpoint
 - Fixed memory usage monitoring
 - Fixed error handling in logger context
-
-### Pending Implementation
-
-- Language translation system
-- Unit conversion real-time updates
 
 ## [1.1.0] - 2025-03-27
 
