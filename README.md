@@ -333,6 +333,30 @@ For a hotfix:
 
    The frontend will start on port 3000 and automatically open in your browser.
 
+### Server Management Scripts
+
+For easier development, the project includes scripts to manage server processes:
+
+1. To start both backend and frontend servers with automatic process management:
+
+   ```bash
+   cd weather-dashboard
+   ./start-servers.sh
+   ```
+
+2. For quick frontend-only testing:
+
+   ```bash
+   cd weather-dashboard
+   ./start-frontend.sh
+   ```
+
+These scripts automatically:
+
+- Kill any existing React/Python processes to prevent port conflicts
+- Start the required servers
+- Provide visual feedback on the terminal
+
 ### Using NPM Scripts from Root
 
 For convenience, you can also use the project-wide npm scripts from the root directory:
