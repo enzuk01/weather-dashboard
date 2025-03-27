@@ -9,7 +9,7 @@
         "install:backend": "cd weather-dashboard/backend && pip3 install -r requirements.txt",
         "install": "npm run install:frontend && npm run install:backend",
         "test": "cd weather-dashboard/frontend && npm test",
-        "prepare": "husky install",
+        "prepare": "husky",
         "docs:check": "node scripts/check-docs.js"
     },
     "keywords": [
@@ -22,11 +22,11 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "@commitlint/cli": "^17.0.0",
-        "@commitlint/config-conventional": "^17.0.0",
+        "@commitlint/cli": "^19.0.0",
+        "@commitlint/config-conventional": "^19.0.0",
         "concurrently": "^8.2.0",
-        "husky": "^8.0.0",
-        "lint-staged": "^13.0.0"
+        "husky": "^9.0.0",
+        "lint-staged": "^15.0.0"
     },
     "private": true,
     "engines": {
