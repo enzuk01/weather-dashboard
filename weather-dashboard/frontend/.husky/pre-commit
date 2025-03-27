@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "\n\033[1;33mReminder: Update CHANGELOG.md if you have made noteworthy changes\033[0m\n"
+
+# Check if CHANGELOG.md was modified
+if git diff --cached --name-only | grep -q "CHANGELOG.md"; then
+  echo "\033[0;32m✓ Great! You've updated the CHANGELOG.md file.\033[0m\n"
+else
+  echo "\033[0;33m⚠ No changes to CHANGELOG.md detected.\033[0m"
+  echo "\033[0;33m  Consider updating it if you've added new features or fixed bugs.\033[0m\n"
+fi
+
+# Continue with commit
+exit 0

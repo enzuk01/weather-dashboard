@@ -42,7 +42,7 @@ describe('WindDirectionIndicator', () => {
         const arrowElement = screen.getByText('↑');
 
         // Check that it has the correct rotation transform
-        expect(arrowElement).toHaveStyle('transform: rotate(90deg)');
+        expect(arrowElement).toHaveStyle({ transform: 'rotate(90deg)' });
     });
 
     test('applies size classes', () => {
