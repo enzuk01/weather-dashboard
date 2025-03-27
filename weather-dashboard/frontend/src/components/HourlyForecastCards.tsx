@@ -139,7 +139,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
     // Format precipitation with unit
     const formatPrecipitation = (mm: number): string => {
         const amount = convertPrecipitation(mm, 'mm', precipitationUnit);
-        return `${amount.toFixed(1)}${precipitationUnit}`;
+        return `${amount.toFixed(1)} ${precipitationUnit}`;
     };
 
     if (loading) {
