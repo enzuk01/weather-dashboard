@@ -190,10 +190,10 @@ const DashboardContent = ({ location, onLocationChange }: { location: Location; 
 function App() {
     // Create location state at App level so it can be shared with Header
     const [location, setLocation] = useState<Location>({
-        name: 'New York',
-        country: 'US',
-        latitude: 40.7128,
-        longitude: -74.006
+        name: 'London',
+        country: 'UK',
+        latitude: 51.5074,
+        longitude: -0.1278
     });
 
     // Create a modified version of DashboardContent that receives the location state
