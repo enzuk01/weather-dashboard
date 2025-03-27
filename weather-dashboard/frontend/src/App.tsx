@@ -205,7 +205,7 @@ function App() {
     return (
         <ThemeProvider>
             <SettingsProvider>
-                <div className="min-h-screen bg-gradient-to-b from-blue-800 to-blue-600 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+                <div className="min-h-screen bg-gradient-to-b from-blue-800 to-blue-600 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
                     <Header
                         title="Weather Dashboard"
                         locationName={location.name}

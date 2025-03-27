@@ -2,6 +2,7 @@ import React from 'react';
 import { isOffline } from '../utils/storageUtils';
 import ThemeToggle from './ui/ThemeToggle';
 import OfflineIndicator from './ui/OfflineIndicator';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
     title: string;
@@ -10,12 +11,18 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, locationName, onSettingsClick }) => {
+    const { isDark } = useTheme();
+
     return (
-        <header className="sticky top-0 bg-gradient-to-r from-blue-800 to-blue-600 dark:from-slate-800 dark:to-slate-900 py-3 px-4 flex justify-between items-center z-20 shadow-lg transition-colors duration-300">
+        <header className={`sticky top-0 z-20 shadow-lg py-3 px-4 flex justify-between items-center transition-colors duration-500
+            ${isDark
+                ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white'
+                : 'bg-gradient-to-r from-blue-800 to-blue-600 text-white'
+            }`}>
             <div className="flex items-center">
-                <h1 className="text-xl md:text-2xl font-bold text-white">{title}</h1>
+                <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
                 {locationName && (
-                    <span className="text-lg md:text-xl text-white/90 ml-2 font-medium">
+                    <span className="text-lg md:text-xl opacity-90 ml-2 font-medium">
                         | {locationName}
                     </span>
                 )}
@@ -25,7 +32,8 @@ const Header: React.FC<HeaderProps> = ({ title, locationName, onSettingsClick })
                 <ThemeToggle />
                 <button
                     onClick={onSettingsClick}
-                    className="text-white hover:text-blue-200 dark:hover:text-blue-300 transition-colors"
+                    className={`hover:text-blue-200 dark:hover:text-blue-300 transition-colors p-2 rounded-full
+                        ${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-blue-700/30'}`}
                     aria-label="Open Settings"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

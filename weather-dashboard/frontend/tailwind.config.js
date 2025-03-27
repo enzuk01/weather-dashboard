@@ -96,6 +96,10 @@ module.exports = {
                 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
                 'glass-strong': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
             },
+            dropShadow: {
+                'glow': '0 0 6px rgba(254, 240, 138, 0.7)',
+                'glow-blue': '0 0 6px rgba(96, 165, 250, 0.7)',
+            },
         },
     },
     plugins: [
