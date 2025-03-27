@@ -13,6 +13,7 @@
 - Added precipitation unit selection (mm/inches)
 - Added refresh interval customization options
 - Added settings persistence using localStorage
+- Added auto-refresh functionality based on user settings
 
 ### Changed
 
@@ -20,6 +21,7 @@
 - Enhanced Git workflow with conventional commits
 - Improved dark mode implementation with smooth transitions
 - Enhanced theme toggle with ripple effect and dynamic glow
+- Improved CurrentWeatherDisplay component with responsive layout and unit conversions
 
 ### Fixed
 
@@ -31,7 +33,6 @@
 
 ### Pending Implementation
 
-- Auto-refresh functionality based on selected interval
 - Language translation system
 - Unit conversion real-time updates
 

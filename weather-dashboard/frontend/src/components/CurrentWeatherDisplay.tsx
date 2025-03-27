@@ -15,27 +15,36 @@ interface CurrentWeatherDisplayProps {
 
 const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude, longitude }) => {
     const [weatherData, setWeatherData] = useState<CurrentWeatherData | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { temperatureUnit, windSpeedUnit, precipitationUnit } = useSettings();
+    const { temperatureUnit, windSpeedUnit, precipitationUnit, refreshInterval } = useSettings();
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const data = await fetchCurrentWeather(latitude, longitude);
+            setWeatherData(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching current weather:', err);
+            setError('Failed to load current weather data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Initial data fetch
     useEffect(() => {
-        const fetchWeather = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const data = await fetchCurrentWeather(latitude, longitude);
-                setWeatherData(data);
-            } catch (err) {
-                setError('Failed to fetch current weather data. Please try again later.');
-                console.error('Error fetching current weather:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchWeather();
+        fetchData();
     }, [latitude, longitude]);
+
+    // Set up auto-refresh interval
+    useEffect(() => {
+        const intervalId = setInterval(fetchData, refreshInterval * 60 * 1000); // Convert minutes to milliseconds
+
+        // Cleanup interval on unmount or when refresh interval changes
+        return () => clearInterval(intervalId);
+    }, [refreshInterval, latitude, longitude]);
 
     // Determine if it's currently daytime based on weather data
     const isDaytime = (): boolean => {
@@ -136,106 +145,59 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
     };
 
     if (loading) {
-        return <LoadingState message="Loading current weather data..." />;
+        return <LoadingState />;
     }
 
     if (error) {
-        return <ErrorState message={error} retryAction={() => { }} />;
+        return <ErrorState message={error} retryAction={fetchData} />;
     }
 
     if (!weatherData) {
-        return <ErrorState message="No weather data available" retryAction={() => { }} />;
+        return null;
     }
 
+    // Convert units based on user preferences
+    const temperature = convertTemperature(weatherData.temperature_2m, 'celsius', temperatureUnit);
+    const windSpeed = convertWindSpeed(weatherData.wind_speed_10m, 'kph', windSpeedUnit);
+    const precipitation = convertPrecipitation(weatherData.precipitation, 'mm', precipitationUnit);
+
     return (
-        <GlassCard className="p-5">
-            <div className="flex flex-col">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 className="text-2xl text-white font-bold">Current Weather</h2>
-                        <div className="text-white/60 text-sm">{formatDate()}</div>
-                    </div>
+        <GlassCard className="p-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                     <WeatherIcon
                         weatherCode={weatherData.weather_code}
                         isDay={weatherData.is_day === 1}
-                        size="lg"
+                        size="xl"
                     />
-                </div>
-
-                <div className="flex items-center mb-5">
-                    <div className="text-5xl text-white font-bold mr-4">
-                        {formatTemperature(weatherData.temperature_2m)}
-                    </div>
-                    <div className="flex flex-col">
-                        <div className="text-xl text-white">
-                            {getWeatherCondition(weatherData.weather_code)}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Enhanced Feels Like section */}
-                <div className="bg-white/10 rounded-lg p-3 mb-5">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <div className="text-lg font-medium text-white">Feels Like</div>
-                            <div className="ml-2 text-xl font-bold text-white">
-                                {formatTemperature(weatherData.apparent_temperature)}
-                            </div>
-                            <div className="ml-2 text-xl">
-                                {getFeelsLikeIcon(weatherData.temperature_2m, weatherData.apparent_temperature)}
-                            </div>
-                        </div>
-                        <div className="text-sm text-white/80 italic">
-                            {getFeelsLikeDescription(weatherData.temperature_2m, weatherData.apparent_temperature)}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-white">
                     <div>
-                        <div className="flex items-center mt-2">
-                            <div className="flex items-center mr-6">
-                                <span className="text-white/80 text-sm mr-2">Humidity:</span>
-                                <span className="text-white font-medium">
-                                    {weatherData.relative_humidity_2m}%
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center mt-2">
-                            <div className="flex items-center">
-                                <span className="text-white/80 text-sm mr-2">Precipitation:</span>
-                                <span className="text-white font-medium">
-                                    {formatPrecipitation(weatherData.precipitation)}
-                                </span>
-                            </div>
+                        <h2 className="text-3xl font-bold">
+                            {temperature.toFixed(1)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
+                        </h2>
+                        <p className="text-lg text-gray-600 dark:text-gray-300">
+                            Feels like {convertTemperature(weatherData.apparent_temperature, 'celsius', temperatureUnit).toFixed(1)}°{temperatureUnit === 'celsius' ? 'C' : 'F'}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Humidity</p>
+                        <p className="text-lg font-semibold">{weatherData.relative_humidity_2m}%</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Wind</p>
+                        <div className="flex items-center gap-2">
+                            <WindDirectionIndicator direction={weatherData.wind_direction_10m} />
+                            <p className="text-lg font-semibold">
+                                {windSpeed.toFixed(1)} {windSpeedUnit}
+                            </p>
                         </div>
                     </div>
-
-                    <div>
-                        {/* Wind information */}
-                        <div className="flex items-center mt-2">
-                            <div className="flex items-center mr-6">
-                                <span className="text-white/80 text-sm mr-2">Wind:</span>
-                                <span className="text-white font-medium">
-                                    {formatWindSpeed(weatherData.wind_speed_10m)}
-                                </span>
-                                <WindDirectionIndicator
-                                    direction={weatherData.wind_direction_10m}
-                                    className="ml-2"
-                                    size="sm"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center mt-2">
-                            <div className="flex items-center">
-                                <span className="text-white/80 text-sm mr-2">Pressure:</span>
-                                <span className="text-white font-medium">
-                                    {Math.round(weatherData.surface_pressure)} hPa
-                                </span>
-                            </div>
-                        </div>
+                    <div className="text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Precipitation</p>
+                        <p className="text-lg font-semibold">
+                            {precipitation.toFixed(2)} {precipitationUnit}
+                        </p>
                     </div>
                 </div>
             </div>
