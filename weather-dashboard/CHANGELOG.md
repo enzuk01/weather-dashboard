@@ -53,6 +53,30 @@
 - Language translation system
 - Unit conversion real-time updates
 
+## [1.2.2] - 2024-03-28
+
+### Added
+
+- Enhanced geolocation initialization with OpenStreetMap reverse geocoding
+- Added detailed location error messages for better user feedback
+- Added location detection state management with loading indicators
+
+### Changed
+
+- Improved geolocation settings for better reliability:
+  - Disabled high accuracy mode for faster response
+  - Added 5-minute location cache
+  - Increased timeout to 10 seconds
+- Enhanced error handling with specific error messages for different failure cases
+- Improved location fallback behavior when geolocation fails
+
+### Fixed
+
+- Fixed issue with location detection getting stuck in "Detecting..." state
+- Fixed missing location name and country information
+- Fixed geolocation initialization timing issues
+- Fixed error message display for location detection failures
+
 ## [1.2.1] - 2024-03-27
 
 ### Fixed
