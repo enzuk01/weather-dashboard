@@ -11,7 +11,10 @@ export interface CurrentWeatherData {
     temperature_2m: number;
 
     // Apparent (feels like) temperature in degrees Celsius
-    apparent_temperature: number;
+    apparent_temperature?: number;
+
+    // Feels like temperature in degrees Celsius (alternative field name)
+    feels_like_temperature?: number;
 
     // Relative humidity at 2 meters above ground in percentage
     relative_humidity_2m: number;

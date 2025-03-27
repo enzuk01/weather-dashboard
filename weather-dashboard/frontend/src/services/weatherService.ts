@@ -90,14 +90,6 @@ export const fetchHourlyForecast = async (latitude: number, longitude: number, h
     await logger.startPerformanceMetric(metricName);
 
     try {
-        // Check cache first
-        const cachedData = loadFromStorage<HourlyForecastData>(STORAGE_KEYS.HOURLY_FORECAST, latitude, longitude);
-        if (cachedData) {
-            await logger.info('Successfully loaded cached hourly forecast');
-            await logger.endPerformanceMetric(metricName);
-            return cachedData;
-        }
-
         // Check if offline
         if (isOffline()) {
             await logger.error('Device is offline and no cached data is available');
@@ -112,22 +104,21 @@ export const fetchHourlyForecast = async (latitude: number, longitude: number, h
             `${API_BASE_URL}/weather/forecast/hourly?lat=${latitude}&lon=${longitude}&hours=${hours}`
         );
 
-        if (!response.ok) {
-            const errorData = await response.json() as ApiErrorResponse;
-            throw new Error(errorData.message || 'Failed to fetch hourly forecast');
-        }
+        const data = await response.json();
 
-        const data = await response.json() as HourlyForecastData;
+        if (!response.ok) {
+            throw new Error('Failed to fetch hourly forecast');
+        }
 
         // Log successful response
         await logger.info('Successfully fetched hourly forecast', { status: response.status });
 
         // Save data to storage for offline use
-        saveToStorage(STORAGE_KEYS.HOURLY_FORECAST, data, latitude, longitude);
+        saveToStorage(STORAGE_KEYS.HOURLY_FORECAST, data as HourlyForecastData, latitude, longitude);
         await logger.debug('Saved hourly forecast to local storage');
 
         await logger.endPerformanceMetric(metricName);
-        return data;
+        return data as HourlyForecastData;
     } catch (error) {
         // Log the error
         await logger.error('Error fetching hourly forecast', error);
@@ -264,14 +255,15 @@ export async function fetchWeatherCodes(): Promise<Map<number, string>> {
     try {
         const response = await fetch(`${API_BASE_URL}/weather/codes`);
 
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error(`Failed to fetch weather codes: ${response.statusText}`);
+            throw new Error(`Failed to fetch weather codes: ${data.message || response.statusText}`);
         }
 
-        const data = await response.json();
         return new Map(Object.entries(data).map(([code, description]) => [parseInt(code), description as string]));
     } catch (error) {
-        console.error('Error fetching weather codes:', error);
-        throw error;
+        await logger.error('Error fetching weather codes:', error);
+        throw new Error('Failed to fetch weather codes');
     }
 }
