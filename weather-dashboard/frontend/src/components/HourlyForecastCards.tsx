@@ -7,6 +7,7 @@ import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
 import { sample12HourData, formatLocalTime } from '../utils/timeUtils';
+import { useSettings, convertTemperature } from '../contexts/SettingsContext';
 
 interface HourlyForecastCardsProps {
     latitude: number;
@@ -23,6 +24,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
     const [sampledData, setSampledData] = useState<HourlyForecastData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { temperatureUnit } = useSettings();
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -122,6 +124,12 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
         return 'Unknown';
     };
 
+    // Format temperature with unit
+    const formatTemperature = (celsius: number): string => {
+        const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
+        return `${Math.round(temp)}°${temperatureUnit === 'celsius' ? 'C' : 'F'}`;
+    };
+
     if (loading) {
         return <LoadingState message="Loading hourly forecast..." />;
     }
@@ -184,7 +192,7 @@ const HourlyForecastCards: React.FC<HourlyForecastCardsProps> = ({
                                                 />
                                             </div>
                                             <div className="text-white font-medium mb-1">
-                                                {Math.round(sampledData.temperature_2m[index])}°C
+                                                {formatTemperature(sampledData.temperature_2m[index])}
                                             </div>
                                             <div className="flex items-center justify-center gap-1 text-white/70 text-xs">
                                                 <span>{Math.round(sampledData.wind_speed_10m[index])} km/h</span>

@@ -6,6 +6,7 @@ import LoadingState from './ui/LoadingState';
 import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
+import { useSettings, convertTemperature } from '../contexts/SettingsContext';
 
 interface DailyForecastCardsProps {
     latitude: number;
@@ -21,6 +22,7 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
     const [forecastData, setForecastData] = useState<DailyForecastData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { temperatureUnit } = useSettings();
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -48,6 +50,12 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
     const formatDate = (timestamp: string): string => {
         const date = new Date(timestamp);
         return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    };
+
+    // Format temperature with unit
+    const formatTemperature = (celsius: number): string => {
+        const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
+        return `${Math.round(temp)}°`;
     };
 
     if (loading) {
@@ -94,10 +102,10 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
                     <div>
                         <div className="flex justify-between items-center">
                             <span className="text-white font-bold text-base sm:text-lg">
-                                {Math.round(forecastData.temperature_2m_max[index])}°
+                                {formatTemperature(forecastData.temperature_2m_max[index])}
                             </span>
                             <span className="text-white/70 text-sm">
-                                {Math.round(forecastData.temperature_2m_min[index])}°
+                                {formatTemperature(forecastData.temperature_2m_min[index])}
                             </span>
                         </div>
                         <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs sm:text-sm text-white/70">

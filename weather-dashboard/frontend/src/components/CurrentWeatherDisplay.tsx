@@ -6,6 +6,7 @@ import LoadingState from './ui/LoadingState';
 import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
 import WindDirectionIndicator from './WindDirectionIndicator';
+import { useSettings, convertTemperature } from '../contexts/SettingsContext';
 
 interface CurrentWeatherDisplayProps {
     latitude: number;
@@ -16,6 +17,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
     const [weatherData, setWeatherData] = useState<CurrentWeatherData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { temperatureUnit } = useSettings();
 
     useEffect(() => {
         const fetchWeather = async () => {
@@ -115,6 +117,12 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
         return '↓';
     };
 
+    // Format temperature with unit
+    const formatTemperature = (celsius: number): string => {
+        const temp = convertTemperature(celsius, 'celsius', temperatureUnit);
+        return `${Math.round(temp)}°${temperatureUnit === 'celsius' ? 'C' : 'F'}`;
+    };
+
     if (loading) {
         return <LoadingState message="Loading current weather data..." />;
     }
@@ -144,7 +152,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
 
                 <div className="flex items-center mb-5">
                     <div className="text-5xl text-white font-bold mr-4">
-                        {Math.round(weatherData.temperature_2m)}°C
+                        {formatTemperature(weatherData.temperature_2m)}
                     </div>
                     <div className="flex flex-col">
                         <div className="text-xl text-white">
@@ -159,7 +167,7 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
                         <div className="flex items-center">
                             <div className="text-lg font-medium text-white">Feels Like</div>
                             <div className="ml-2 text-xl font-bold text-white">
-                                {Math.round(weatherData.apparent_temperature)}°C
+                                {formatTemperature(weatherData.apparent_temperature)}
                             </div>
                             <div className="ml-2 text-xl">
                                 {getFeelsLikeIcon(weatherData.temperature_2m, weatherData.apparent_temperature)}
