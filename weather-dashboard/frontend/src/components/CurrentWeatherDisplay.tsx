@@ -89,6 +89,32 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
         return 'Unknown';
     };
 
+    // Get description of how the temperature feels compared to actual
+    const getFeelsLikeDescription = (actualTemp: number, feelsLikeTemp: number): string => {
+        const difference = feelsLikeTemp - actualTemp;
+
+        if (Math.abs(difference) < 2) return 'similar to actual temperature';
+
+        if (difference >= 2) {
+            if (difference >= 5) return 'much warmer than actual';
+            return 'warmer than actual';
+        } else {
+            if (difference <= -5) return 'much colder than actual';
+            return 'colder than actual';
+        }
+    };
+
+    // Get appropriate icon for feels like temperature difference
+    const getFeelsLikeIcon = (actualTemp: number, feelsLikeTemp: number): string => {
+        const difference = feelsLikeTemp - actualTemp;
+
+        if (Math.abs(difference) < 2) return '≈';
+        if (difference >= 5) return '🔥';
+        if (difference > 0) return '↑';
+        if (difference <= -5) return '❄️';
+        return '↓';
+    };
+
     if (loading) {
         return <LoadingState message="Loading current weather data..." />;
     }
@@ -124,8 +150,23 @@ const CurrentWeatherDisplay: React.FC<CurrentWeatherDisplayProps> = ({ latitude,
                         <div className="text-xl text-white">
                             {getWeatherCondition(weatherData.weather_code)}
                         </div>
-                        <div className="text-white/60">
-                            Feels like {Math.round(weatherData.apparent_temperature)}°C
+                    </div>
+                </div>
+
+                {/* Enhanced Feels Like section */}
+                <div className="bg-white/10 rounded-lg p-3 mb-5">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <div className="text-lg font-medium text-white">Feels Like</div>
+                            <div className="ml-2 text-xl font-bold text-white">
+                                {Math.round(weatherData.apparent_temperature)}°C
+                            </div>
+                            <div className="ml-2 text-xl">
+                                {getFeelsLikeIcon(weatherData.temperature_2m, weatherData.apparent_temperature)}
+                            </div>
+                        </div>
+                        <div className="text-sm text-white/80 italic">
+                            {getFeelsLikeDescription(weatherData.temperature_2m, weatherData.apparent_temperature)}
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,7 @@
 ### Added
 
 - Added Husky pre-commit hook to remind about updating CHANGELOG
+- Enhanced "Feels Like" temperature display with visual indicators and descriptions
 
 ### Fixed
 
