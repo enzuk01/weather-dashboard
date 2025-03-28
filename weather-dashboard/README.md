@@ -1,20 +1,52 @@
 # Weather Dashboard Application
 
-[Previous content remains unchanged...]
+[Previous content remains unchanged until API Documentation section...]
 
 ## API Documentation
 
+### Server Configuration
+
+The application runs on the following ports:
+
+- Frontend: Port 3001
+- Backend: Port 5003
+
 ### Endpoints
 
-1. **Daily Forecast**
+1. **Current Weather**
 
    ```
-   GET /weather/forecast/daily
+   GET /api/current-weather
    ```
 
    Parameters:
-   - `lat` (float): Latitude of the location
-   - `lon` (float): Longitude of the location
+   - `latitude` (float): Latitude of the location
+   - `longitude` (float): Longitude of the location
+
+   Response includes current temperature, humidity, precipitation, wind conditions, and weather code.
+
+2. **Hourly Forecast**
+
+   ```
+   GET /api/hourly-forecast
+   ```
+
+   Parameters:
+   - `latitude` (float): Latitude of the location
+   - `longitude` (float): Longitude of the location
+   - `hours` (int, optional): Number of hours to forecast (default: 24)
+
+   Response includes hourly predictions for temperature, precipitation probability, wind conditions, etc.
+
+3. **Daily Forecast**
+
+   ```
+   GET /api/daily-forecast
+   ```
+
+   Parameters:
+   - `latitude` (float): Latitude of the location
+   - `longitude` (float): Longitude of the location
    - `days` (int, optional): Number of days to forecast (default: 7)
 
    Response structure:
@@ -32,150 +64,35 @@
    }
    ```
 
-2. **Hourly Forecast**
+4. **Health Check**
 
    ```
-   GET /weather/forecast/hourly
+   GET /api/health
    ```
 
-   Parameters:
-   - `lat` (float): Latitude of the location
-   - `lon` (float): Longitude of the location
-   - `hours` (int, optional): Number of hours to forecast (default: 24)
-
-   Response structure:
-
-   ```typescript
-   {
-     timestamps: string[];        // Array of timestamps in YYYY-MM-DDThh:mm format
-     temperature_2m: number[];    // Temperature at 2m above ground in °C
-     apparent_temperature: number[]; // Feels-like temperature in °C
-     precipitation_probability: number[]; // Precipitation probability (0-100)
-     precipitation: number[];     // Precipitation amount in mm
-     rain: number[];             // Rain amount in mm
-     showers: number[];          // Shower amount in mm
-     snowfall: number[];         // Snowfall amount in mm
-     cloud_cover: number[];      // Cloud cover percentage (0-100)
-     weather_code: number[];     // WMO weather codes
-     wind_speed_10m: number[];   // Wind speed at 10m in km/h
-     wind_direction_10m: number[]; // Wind direction in degrees
-     relative_humidity_2m: number[]; // Relative humidity at 2m (0-100)
-     wind_gusts_10m: number[];   // Wind gusts at 10m in km/h
-     is_day: number[];          // Daylight indicator (1 for day, 0 for night)
-   }
-   ```
-
-3. **Weather Codes**
-
-   ```
-   GET /weather/codes
-   ```
-
-   Response structure:
-
-   ```typescript
-   {
-     [key: string]: string;      // Mapping of WMO codes to descriptions
-   }
-   ```
-
-   Example:
+   Response:
 
    ```json
    {
-     "0": "Clear sky",
-     "1": "Mainly clear",
-     "2": "Partly cloudy",
-     "3": "Overcast"
-     // ... more codes
+     "status": "healthy"
    }
-   ```
-
-### Data Structure Types
-
-```typescript
-// Combined weather data interface
-export interface WeatherData {
-    current: CurrentWeatherData;
-    hourly: HourlyForecastData;
-    daily: DailyForecastData;
-    location: LocationData;
-}
-
-// Daily forecast data structure
-export interface DailyForecastData {
-    time: string[];                      // Array of dates
-    temperature_2m_max: number[];        // Maximum temperatures
-    temperature_2m_min: number[];        // Minimum temperatures
-    precipitation_sum: number[];         // Daily precipitation totals
-    precipitation_probability_max: number[]; // Maximum precipitation probability
-    wind_speed_10m_max: number[];       // Maximum wind speeds
-    wind_direction_10m_dominant: number[]; // Dominant wind directions
-    weather_code: number[];             // Weather condition codes
-}
-
-// Hourly forecast data structure
-export interface HourlyForecastData {
-    timestamps: string[];               // Hourly timestamps
-    temperature_2m: number[];          // Temperatures
-    precipitation: number[];           // Precipitation amounts
-    precipitation_probability: number[]; // Precipitation probabilities
-    wind_speed_10m: number[];         // Wind speeds
-    wind_direction_10m: number[];     // Wind directions
-    weather_code: number[];           // Weather condition codes
-    is_day: number[];                // Day/night indicators
-}
-
-// Location data structure
-export interface LocationData {
-    name: string;
-    country: string;
-    state?: string;
-    latitude: number;
-    longitude: number;
-}
-```
-
-### Usage Examples
-
-1. **Fetching Daily Forecast**
-
-   ```typescript
-   const response = await fetch(
-     `${API_BASE_URL}/weather/forecast/daily?lat=51.5074&lon=-0.1278&days=7`
-   );
-   const dailyData: DailyForecastData = await response.json();
-   ```
-
-2. **Accessing Weather Data in Components**
-
-   ```typescript
-   const DailyForecastCards: React.FC<{ weatherData: WeatherData }> = ({ weatherData }) => {
-     // Access daily forecast data through weatherData.daily
-     const { time, temperature_2m_max, temperature_2m_min } = weatherData.daily;
-
-     return (
-       // Component implementation
-     );
-   };
    ```
 
 ### Error Handling
 
-All endpoints return standard HTTP status codes:
+All endpoints follow a consistent error response format:
 
-- 200: Successful request
-- 400: Invalid parameters
-- 404: Location not found
-- 500: Server error
-
-Error response structure:
-
-```typescript
+```json
 {
-    message: string;  // Error description
-    status: number;   // HTTP status code
+  "message": "Error description",
+  "status": 400
 }
 ```
 
-[Rest of README content remains unchanged...]
+Common error codes:
+
+- 400: Bad Request (invalid parameters)
+- 404: Not Found
+- 500: Internal Server Error
+
+[Remaining content unchanged...]

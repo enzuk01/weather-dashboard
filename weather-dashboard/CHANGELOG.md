@@ -30,6 +30,33 @@
   - API version management and documentation
   - Frontend API client SDK generation
 
+## [1.3.2] - 2024-03-28
+
+### Added
+
+- Added comprehensive API endpoint validation in restart script
+- Added detailed error reporting for API endpoint failures
+- Added documentation for API improvements in development backlog
+
+### Changed
+
+- Updated API endpoint URLs to match backend routes:
+  - Changed `/weather/current` to `/api/current-weather`
+  - Changed `/weather/forecast/hourly` to `/api/hourly-forecast`
+  - Changed `/weather/forecast/daily` to `/api/daily-forecast`
+- Updated API parameter names for consistency:
+  - Changed `lat` to `latitude`
+  - Changed `lon` to `longitude`
+- Updated API base URL to use correct port (5003)
+- Improved documentation to reflect current codebase state
+
+### Fixed
+
+- Fixed API endpoint mismatches between frontend and backend
+- Fixed frontend-backend communication issues
+- Fixed server port configuration
+- Fixed documentation inconsistencies
+
 ## [1.3.1] - 2024-03-28
 
 ### Changed
