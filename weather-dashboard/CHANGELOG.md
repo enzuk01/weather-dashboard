@@ -4,6 +4,67 @@
 
 ### Added
 
+- None
+
+### Changed
+
+- None
+
+### Fixed
+
+- None
+
+### Pending Implementation
+
+- Weather data visualization improvements:
+  - Optimize grid-based weather data points
+  - Improve data point density and coverage
+  - Enhance visualization performance
+- Language translation system
+- Unit conversion real-time updates
+
+## [1.3.2] - 2024-03-21
+
+### Added
+
+- Added proper API endpoint routing in backend Flask application
+- Added comprehensive error handling for weather data endpoints
+- Added version consistency checks across frontend and backend
+- Added improved documentation for API endpoints in README
+
+### Fixed
+
+- Fixed 404 errors in weather data endpoints
+- Fixed mismatched API endpoint URLs between frontend and backend
+- Fixed version inconsistencies between package files
+
+### Changed
+
+- Updated backend routes to match frontend expectations
+- Updated project structure documentation
+- Standardized error responses across all API endpoints
+
+## [1.3.1] - 2024-03-28
+
+### Changed
+
+- Improved layout organization:
+  - Removed duplicate Precipitation chart from top section
+  - Moved Precipitation chart exclusively to 24-Hours tab
+  - Enhanced Sunrise & Sunset card layout
+- Updated component tests to use new WeatherData interface
+- Improved type safety across components
+
+### Fixed
+
+- Fixed duplicate Precipitation chart display
+- Fixed TypeScript errors in component tests
+- Fixed property name mismatches in WeatherData interfaces
+
+## [1.3.0] - 2024-03-28
+
+### Added
+
 - Added interactive weather map with initial implementation:
   - OpenStreetMap base layer integration
   - Weather data layer controls (Temperature, Precipitation, Wind, Cloud cover)
@@ -15,6 +76,11 @@
 - Added utility script for capturing API response fixtures
 - Added improved error handling in weather service tests
 - Added test data strategy documentation
+- Added comprehensive release workflow:
+  - Release process documentation (RELEASE_WORKFLOW.md)
+  - Version check script (scripts/check-versions.sh)
+  - Pre-release checklist and guidelines
+  - Hotfix process documentation
 
 ### Changed
 
@@ -29,6 +95,8 @@
 - Moved fixture capture script to dedicated scripts directory
 - Updated test cases to use real API response data
 - Improved error handling consistency across services
+- Enhanced version management and release process
+- Updated documentation maintenance procedures
 
 ### Fixed
 
@@ -43,15 +111,7 @@
 - Fixed test failures related to error message handling
 - Fixed port conflict issues with backend server
 - Fixed test suite organization
-
-### Pending Implementation
-
-- Weather data visualization improvements:
-  - Optimize grid-based weather data points
-  - Improve data point density and coverage
-  - Enhance visualization performance
-- Language translation system
-- Unit conversion real-time updates
+- Fixed version synchronization between local and remote repositories
 
 ## [1.2.2] - 2024-03-28
 
