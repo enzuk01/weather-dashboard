@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 import { STORAGE_KEYS, saveToStorage, loadFromStorage, isOffline } from '../utils/storageUtils';
 import { CurrentWeatherData, HourlyForecastData, DailyForecastData } from '../types/weatherTypes';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5003';
 
 interface ApiErrorResponse {
     message: string;
@@ -42,7 +42,7 @@ export const fetchCurrentWeather = async (latitude: number, longitude: number): 
         await logger.info('Fetching current weather data', { latitude, longitude });
 
         // Fetch fresh data from API
-        const response = await fetch(`${API_BASE_URL}/weather/current?lat=${latitude}&lon=${longitude}`);
+        const response = await fetch(`${API_BASE_URL}/api/current-weather?latitude=${latitude}&longitude=${longitude}`);
 
         if (!response.ok) {
             const errorData = await response.json() as ApiErrorResponse;
@@ -101,7 +101,7 @@ export const fetchHourlyForecast = async (latitude: number, longitude: number, h
 
         // Fetch fresh data from API
         const response = await fetch(
-            `${API_BASE_URL}/weather/forecast/hourly?lat=${latitude}&lon=${longitude}&hours=${hours}`
+            `${API_BASE_URL}/api/hourly-forecast?latitude=${latitude}&longitude=${longitude}&hours=${hours}`
         );
 
         const data = await response.json();
@@ -168,7 +168,7 @@ export const fetchDailyForecast = async (latitude: number, longitude: number, da
 
         // Fetch fresh data from API
         const response = await fetch(
-            `${API_BASE_URL}/weather/forecast/daily?lat=${latitude}&lon=${longitude}&days=${days}`
+            `${API_BASE_URL}/api/daily-forecast?latitude=${latitude}&longitude=${longitude}&days=${days}`
         );
 
         if (!response.ok) {

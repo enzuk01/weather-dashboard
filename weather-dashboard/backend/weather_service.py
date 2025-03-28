@@ -189,30 +189,32 @@ def get_daily_forecast(latitude, longitude, days=7):
 
         # Using basic implementation
         response = om.get_weather(params)
+        formatted_data = om.format_daily_forecast(response, days)
 
-        # Extract and format the daily forecast data
-        daily = response.get('daily', {})
+        # Extract the daily data and metadata
+        daily_data = formatted_data.get('daily', {})
+        metadata = {
+            'latitude': formatted_data.get('latitude'),
+            'longitude': formatted_data.get('longitude'),
+            'elevation': formatted_data.get('elevation'),
+            'timezone': formatted_data.get('timezone')
+        }
 
+        # Return the daily data at the root level
         return {
-            "time": daily.get('time', [])[:days],
-            "temperature_2m_max": daily.get('temperature_2m_max', [])[:days],
-            "temperature_2m_min": daily.get('temperature_2m_min', [])[:days],
-            "apparent_temperature_max": daily.get('apparent_temperature_max', [])[:days],
-            "apparent_temperature_min": daily.get('apparent_temperature_min', [])[:days],
-            "sunrise": daily.get('sunrise', [])[:days],
-            "sunset": daily.get('sunset', [])[:days],
-            "uv_index_max": daily.get('uv_index_max', [])[:days],
-            "precipitation_sum": daily.get('precipitation_sum', [])[:days],
-            "rain_sum": daily.get('rain_sum', [])[:days],
-            "snowfall_sum": daily.get('snowfall_sum', [])[:days],
-            "precipitation_probability_max": daily.get('precipitation_probability_max', [])[:days],
-            "weather_code": daily.get('weather_code', [])[:days],
-            "wind_speed_10m_max": daily.get('wind_speed_10m_max', [])[:days],
-            "wind_direction_10m_dominant": daily.get('wind_direction_10m_dominant', [])[:days],
-            "latitude": response.get('latitude'),
-            "longitude": response.get('longitude'),
-            "elevation": response.get('elevation'),
-            "timezone": response.get('timezone')
+            'time': daily_data.get('time', []),
+            'temperature_2m_max': daily_data.get('temperature_2m_max', []),
+            'temperature_2m_min': daily_data.get('temperature_2m_min', []),
+            'apparent_temperature_max': daily_data.get('apparent_temperature_max', []),
+            'apparent_temperature_min': daily_data.get('apparent_temperature_min', []),
+            'precipitation_sum': daily_data.get('precipitation_sum', []),
+            'rain_sum': daily_data.get('rain_sum', []),
+            'snowfall_sum': daily_data.get('snowfall_sum', []),
+            'precipitation_probability_max': daily_data.get('precipitation_probability_max', []),
+            'weather_code': daily_data.get('weather_code', []),
+            'wind_speed_10m_max': daily_data.get('wind_speed_10m_max', []),
+            'wind_direction_10m_dominant': daily_data.get('wind_direction_10m_dominant', []),
+            **metadata
         }
 
     except Exception as e:

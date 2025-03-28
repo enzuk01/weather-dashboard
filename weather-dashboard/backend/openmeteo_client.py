@@ -158,3 +158,66 @@ def format_hourly_forecast(response, hours=24):
         logging.error(f"Error formatting hourly forecast: {str(e)}")
         logging.error(traceback.format_exc())
         raise
+
+def format_daily_forecast(response, days=7):
+    """
+    Format the daily forecast data from the API response
+
+    Args:
+        response (dict): API response from Open-Meteo
+        days (int): Number of days to return
+
+    Returns:
+        dict: Formatted daily forecast data
+    """
+    try:
+        daily = response.get('daily', {})
+
+        # Limit data to the requested number of days
+        time = daily.get('time', [])[:days]
+        temperature_max = daily.get('temperature_2m_max', [])[:days]
+        temperature_min = daily.get('temperature_2m_min', [])[:days]
+        apparent_temp_max = daily.get('apparent_temperature_max', [])[:days]
+        apparent_temp_min = daily.get('apparent_temperature_min', [])[:days]
+        precipitation_sum = daily.get('precipitation_sum', [])[:days]
+        rain_sum = daily.get('rain_sum', [])[:days]
+        snowfall_sum = daily.get('snowfall_sum', [])[:days]
+        precip_prob = daily.get('precipitation_probability_max', [])[:days]
+        weather_code = daily.get('weather_code', [])[:days]
+        wind_speed = daily.get('wind_speed_10m_max', [])[:days]
+        wind_direction = daily.get('wind_direction_10m_dominant', [])[:days]
+
+        # Format timestamps to ISO format
+        formatted_time = []
+        for t in time:
+            try:
+                dt = datetime.fromisoformat(t)
+                formatted_time.append(dt.isoformat())
+            except (ValueError, TypeError):
+                formatted_time.append(t)
+
+        # Return data nested under 'daily' property to match frontend expectations
+        return {
+            "daily": {
+                "time": formatted_time,
+                "temperature_2m_max": temperature_max,
+                "temperature_2m_min": temperature_min,
+                "apparent_temperature_max": apparent_temp_max,
+                "apparent_temperature_min": apparent_temp_min,
+                "precipitation_sum": precipitation_sum,
+                "rain_sum": rain_sum,
+                "snowfall_sum": snowfall_sum,
+                "precipitation_probability_max": precip_prob,
+                "weather_code": weather_code,
+                "wind_speed_10m_max": wind_speed,
+                "wind_direction_10m_dominant": wind_direction
+            },
+            "latitude": response.get('latitude'),
+            "longitude": response.get('longitude'),
+            "elevation": response.get('elevation'),
+            "timezone": response.get('timezone')
+        }
+    except Exception as e:
+        logging.error(f"Error formatting daily forecast: {str(e)}")
+        logging.error(traceback.format_exc())
+        raise

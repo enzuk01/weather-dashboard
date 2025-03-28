@@ -49,7 +49,7 @@
 - [x] Develop wind direction indicator
 - [x] Create sunrise/sunset visualization
 - [x] Make components fully responsive
-- [x] Standardize data sampling across components (12 data points, 2-hour intervals)
+- [x] Standardize data sampling across components
 
 ## Advanced Features
 
@@ -101,54 +101,27 @@
 ## Testing and Quality Assurance
 
 - [x] Set up Jest and React Testing Library
-- [x] Write unit tests for key components
+- [-] Write unit tests for key components
   - [x] Set up test infrastructure
   - [x] Create test fixtures from real API responses
   - [x] Fix weather service tests
-  - [x] Add remaining component tests
+  - [-] Add remaining component tests
 - [ ] Add end-to-end testing with Cypress
 - [ ] Add user documentation
 - [ ] Create developer guides
 - [ ] Add API documentation
 
-### Test Data Strategy
-
-- [x] Use real API responses as test fixtures
-- [x] Store fixtures in `__tests__/fixtures/`
-- [x] Organize fixtures by service/component
-- [x] Document fixture creation process
-- [x] Update fixtures when API responses change
-
-### Testing Success Criteria
-
-- [x] All tests use real API response fixtures
-- [x] Tests are stable and don't break with implementation changes
-- [x] Error handling matches real-world scenarios
-- [x] Test coverage for all critical paths
-- [x] Clear documentation of testing patterns
-
-## Performance Optimization
-
-- [x] Standardize data processing with TimeUtils
-- [x] Optimize weather data loading
-- [x] Implement code splitting
-- [x] Add image optimization
-- [x] Optimize animations for lower-end devices
-- [x] Improve API response caching
-- [x] Reduce bundle size
-- [x] Implement performance monitoring
-
 ## Completed in Last Sprint
 
-1. ✅ Added comprehensive release workflow documentation
-2. ✅ Implemented version check script
-3. ✅ Enhanced version management process
-4. ✅ Updated documentation maintenance procedures
-5. ✅ Fixed version synchronization issues
-6. ✅ Added automated documentation checks
-7. ✅ Enhanced Git workflow with conventional commits
-8. ✅ Improved test suite organization
-9. ✅ Added real API response fixtures
+1. ✅ Fixed API endpoint mismatches between frontend and backend
+2. ✅ Updated API base URL configuration
+3. ✅ Improved error detection in restart script
+4. ✅ Enhanced API endpoint validation
+5. ✅ Updated documentation to reflect current state
+6. ✅ Added API improvements to development backlog
+7. ✅ Fixed frontend-backend communication issues
+8. ✅ Improved error handling and validation
+9. ✅ Enhanced server management procedures
 
 ## Next Development Focus (Current Sprint)
 
@@ -159,7 +132,7 @@
    - [ ] Add smooth transitions between data points
 
 2. **Testing and Documentation**
-   - [ ] Complete unit tests for core components
+   - [-] Complete unit tests for core components
    - [ ] Add integration tests
    - [ ] Create user documentation
    - [ ] Update API documentation
@@ -181,17 +154,26 @@
    - [ ] Add progressive loading for large datasets
    - [ ] Optimize map rendering performance
 
-3. **Removed Requirements**
+3. **API Improvements**
+   - [ ] Create OpenAPI/Swagger specification for all endpoints
+   - [ ] Implement API contract testing between frontend and backend
+   - [ ] Add shared TypeScript interfaces for API requests/responses
+   - [ ] Set up automated API endpoint validation
+   - [ ] Add API version management
+   - [ ] Implement API documentation generation
+   - [ ] Create API client SDK for frontend
+
+4. **Removed Requirements**
    - [~] Print-friendly layout
    - [~] Cross-browser testing
 
 ## Server Management Improvements
 
-- [ ] Implement process management tools (e.g., `pm2` for Node.js, `supervisor` for Python) for automatic server restarts and monitoring.
-- [ ] Enhance port management to ensure no unnecessary servers are left running.
-- [ ] Implement comprehensive logging and monitoring for both frontend and backend servers.
-- [ ] Add health check endpoints to the backend for frontend validation.
-- [ ] Ensure graceful shutdown of servers to clean up resources.
-- [ ] Use environment variables for server configuration.
-- [ ] Run automated tests to validate server functionality.
-- [ ] Update documentation with server management instructions.
+- [x] Implement process management tools for automatic server restarts and monitoring
+- [x] Enhance port management to ensure no unnecessary servers are left running
+- [x] Implement comprehensive logging and monitoring for both frontend and backend servers
+- [x] Add health check endpoints to the backend for frontend validation
+- [x] Ensure graceful shutdown of servers to clean up resources
+- [x] Use environment variables for server configuration
+- [-] Run automated tests to validate server functionality
+- [x] Update documentation with server management instructions

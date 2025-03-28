@@ -4,9 +4,6 @@
 
 // Current weather data
 export interface CurrentWeatherData {
-    // Timestamp of the weather data
-    timestamp: string;
-
     // Temperature at 2 meters above ground in degrees Celsius
     temperature_2m: number;
 
@@ -22,20 +19,8 @@ export interface CurrentWeatherData {
     // Precipitation amount in millimeters
     precipitation: number;
 
-    // Rain amount in millimeters
-    rain: number;
-
-    // Showers amount in millimeters
-    showers: number;
-
-    // Snowfall amount in centimeters
-    snowfall: number;
-
-    // Cloud cover in percentage
-    cloud_cover: number;
-
-    // Weather condition code according to WMO (World Meteorological Organization)
-    weather_code: number;
+    // Precipitation probability in percentage
+    precipitation_probability?: number;
 
     // Wind speed at 10 meters above ground in km/h
     wind_speed_10m: number;
@@ -46,8 +31,14 @@ export interface CurrentWeatherData {
     // Surface pressure in hPa
     surface_pressure: number;
 
+    // Weather condition code according to WMO (World Meteorological Organization)
+    weather_code: number;
+
     // Daylight indicator (1 for day, 0 for night)
     is_day: number;
+
+    // UV index
+    uv_index?: number;
 }
 
 // Hourly forecast data
@@ -58,26 +49,11 @@ export interface HourlyForecastData {
     // Array of temperatures at 2 meters above ground in degrees Celsius
     temperature_2m: number[];
 
-    // Array of apparent (feels like) temperatures in degrees Celsius
-    apparent_temperature: number[];
-
-    // Array of precipitation probabilities in percentage
-    precipitation_probability: number[];
-
     // Array of precipitation amounts in millimeters
     precipitation: number[];
 
-    // Array of rain amounts in millimeters
-    rain: number[];
-
-    // Array of showers amounts in millimeters
-    showers: number[];
-
-    // Array of snowfall amounts in centimeters
-    snowfall: number[];
-
-    // Array of cloud cover values in percentage
-    cloud_cover: number[];
+    // Array of precipitation probabilities in percentage
+    precipitation_probability: number[];
 
     // Array of wind speeds at 10 meters above ground in km/h
     wind_speed_10m: number[];
@@ -86,10 +62,7 @@ export interface HourlyForecastData {
     wind_direction_10m: number[];
 
     // Array of wind gust speeds at 10 meters above ground in km/h
-    wind_gusts_10m: number[];
-
-    // Array of relative humidity values at 2 meters above ground in percentage
-    relative_humidity_2m: number[];
+    wind_gusts_10m?: number[];
 
     // Array of weather condition codes according to WMO
     weather_code: number[];
@@ -109,43 +82,35 @@ export interface DailyForecastData {
     // Array of minimum temperatures in degrees Celsius
     temperature_2m_min: number[];
 
-    // Array of maximum apparent temperatures in degrees Celsius
-    apparent_temperature_max: number[];
-
-    // Array of minimum apparent temperatures in degrees Celsius
-    apparent_temperature_min: number[];
-
     // Array of precipitation sum values in millimeters
     precipitation_sum: number[];
-
-    // Array of rain sum values in millimeters
-    rain_sum: number[];
-
-    // Array of showers sum values in millimeters
-    showers_sum: number[];
 
     // Array of precipitation probability maximum values in percentage
     precipitation_probability_max: number[];
 
-    // Array of dominant weather condition codes during the day
-    weather_code: number[];
+    // Array of maximum wind speeds during the day
+    wind_speed_10m_max: number[];
 
     // Array of dominant wind directions during the day
     wind_direction_10m_dominant: number[];
 
-    // Array of maximum wind speeds during the day
-    wind_speed_10m_max: number[];
+    // Array of weather condition codes during the day
+    weather_code: number[];
+
+    // Array of sunrise times for each day
+    sunrise: string[];
+
+    // Array of sunset times for each day
+    sunset: string[];
 }
 
 // Location data
 export interface LocationData {
-    id: string;
     name: string;
+    country: string;
+    state?: string;
     latitude: number;
     longitude: number;
-    country: string;
-    timezone: string;
-    isFavorite?: boolean;
 }
 
 // User preferences for the weather dashboard
@@ -156,4 +121,12 @@ export interface UserPreferences {
     defaultLocation: LocationData | null;
     favoriteLocations: LocationData[];
     theme: 'light' | 'dark' | 'auto';
+}
+
+// Combined weather data interface
+export interface WeatherData {
+    current: CurrentWeatherData;
+    hourly: HourlyForecastData;
+    daily: DailyForecastData;
+    location: LocationData;
 }

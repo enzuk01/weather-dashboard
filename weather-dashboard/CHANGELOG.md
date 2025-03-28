@@ -22,6 +22,13 @@
   - Enhance visualization performance
 - Language translation system
 - Unit conversion real-time updates
+- API infrastructure improvements:
+  - OpenAPI/Swagger specification for all endpoints
+  - API contract testing between frontend and backend
+  - Shared TypeScript interfaces for API types
+  - Automated API endpoint validation
+  - API version management and documentation
+  - Frontend API client SDK generation
 
 ## [1.3.1] - 2024-03-28
 

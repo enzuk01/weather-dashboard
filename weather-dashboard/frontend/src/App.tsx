@@ -14,8 +14,8 @@ import OfflineIndicator from './components/ui/OfflineIndicator';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
-import { fetchHourlyForecast } from './services/weatherService';
-import { HourlyForecastData } from './types/weatherTypes';
+import { fetchHourlyForecast, fetchDailyForecast, fetchCurrentWeather } from './services/weatherService';
+import { WeatherData } from './types/weatherTypes';
 import LoadingState from './components/ui/LoadingState';
 import ErrorState from './components/ui/ErrorState';
 import SettingsPanel from './components/SettingsPanel';
@@ -32,61 +32,57 @@ const DashboardContent: React.FC<{
     isSettingsOpen,
     onSettingsClose
 }) => {
-        // State for hourly precipitation data
-        const [hourlyData, setHourlyData] = useState<HourlyForecastData | null>(null);
-        const [precipLoading, setPrecipLoading] = useState<boolean>(true);
-        const [precipError, setPrecipError] = useState<string | null>(null);
+        const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+        const [loading, setLoading] = useState<boolean>(true);
+        const [error, setError] = useState<string | null>(null);
         const { isDark } = useTheme();
         const settings = useSettings();
 
-        // Sample data for sunrise/sunset (would come from API in production)
-        const sunriseSunsetData = hourlyData ? {
-            sunrise: hourlyData.timestamps[6], // Approximate sunrise time (6 AM)
-            sunset: hourlyData.timestamps[20], // Approximate sunset time (8 PM)
-            currentTime: new Date().toISOString()
-        } : null;
-
-        // Load hourly data for precipitation chart
+        // Load weather data
         useEffect(() => {
-            const loadHourlyData = async () => {
+            const loadWeatherData = async () => {
                 try {
-                    setPrecipLoading(true);
-                    // Use 24 hours instead of 12 for better visualization
-                    const data = await fetchHourlyForecast(location.latitude, location.longitude, 24);
-                    setHourlyData(data);
-                    setPrecipError(null);
+                    setLoading(true);
+                    const [hourlyData, dailyData, currentData] = await Promise.all([
+                        fetchHourlyForecast(location.latitude, location.longitude, 24),
+                        fetchDailyForecast(location.latitude, location.longitude, 7),
+                        fetchCurrentWeather(location.latitude, location.longitude)
+                    ]);
+
+                    setWeatherData({
+                        current: currentData,
+                        hourly: hourlyData,
+                        daily: dailyData,
+                        location: {
+                            name: location.name,
+                            country: location.country,
+                            latitude: location.latitude,
+                            longitude: location.longitude
+                        }
+                    });
+                    setError(null);
                 } catch (err) {
-                    console.error('Error fetching hourly forecast:', err);
-                    setPrecipError('Failed to load precipitation data');
+                    console.error('Error fetching weather data:', err);
+                    setError('Failed to load weather data');
                 } finally {
-                    setPrecipLoading(false);
+                    setLoading(false);
                 }
             };
 
-            loadHourlyData();
-        }, [location.latitude, location.longitude]);
+            loadWeatherData();
+        }, [location]);
 
-        // Render the precipitation chart component with appropriate states
-        const renderPrecipitationChart = () => {
-            if (precipLoading) {
-                return <LoadingState message="Loading precipitation data..." />;
-            }
+        if (loading) {
+            return <LoadingState message="Loading weather data..." />;
+        }
 
-            if (precipError) {
-                return <ErrorState message={precipError} retryAction={() => window.location.reload()} />;
-            }
+        if (error) {
+            return <ErrorState message={error} retryAction={() => window.location.reload()} />;
+        }
 
-            if (!hourlyData) {
-                return <ErrorState message="No precipitation data available" retryAction={() => window.location.reload()} />;
-            }
-
-            return (
-                <PrecipitationChart
-                    timestamps={hourlyData.timestamps}
-                    precipitationProbabilities={hourlyData.precipitation_probability}
-                />
-            );
-        };
+        if (!weatherData) {
+            return <ErrorState message="No weather data available" retryAction={() => window.location.reload()} />;
+        }
 
         return (
             <>
@@ -113,8 +109,7 @@ const DashboardContent: React.FC<{
                                 <ErrorBoundary>
                                     <GlassCard className="p-3 md:p-4 h-full">
                                         <CurrentWeatherDisplay
-                                            latitude={location.latitude}
-                                            longitude={location.longitude}
+                                            weatherData={weatherData}
                                         />
                                     </GlassCard>
                                 </ErrorBoundary>
@@ -123,15 +118,11 @@ const DashboardContent: React.FC<{
                                 <ErrorBoundary>
                                     <GlassCard className="p-3 md:p-4 h-full">
                                         <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Sunrise & Sunset</h2>
-                                        {sunriseSunsetData ? (
-                                            <SunriseSunsetChart
-                                                sunrise={sunriseSunsetData.sunrise}
-                                                sunset={sunriseSunsetData.sunset}
-                                                currentTime={sunriseSunsetData.currentTime}
-                                            />
-                                        ) : (
-                                            <LoadingState message="Loading sunrise/sunset data..." />
-                                        )}
+                                        <SunriseSunsetChart
+                                            sunrise={weatherData.daily.sunrise[0]}
+                                            sunset={weatherData.daily.sunset[0]}
+                                            currentTime={new Date().toISOString()}
+                                        />
                                     </GlassCard>
                                 </ErrorBoundary>
                             </div>
@@ -143,8 +134,7 @@ const DashboardContent: React.FC<{
                                 <GlassCard className="p-3 md:p-4 w-full">
                                     <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>24-Hour Forecast</h2>
                                     <HourlyForecastCards
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
+                                        weatherData={weatherData}
                                     />
                                 </GlassCard>
                             </ErrorBoundary>
@@ -152,7 +142,10 @@ const DashboardContent: React.FC<{
                             <ErrorBoundary>
                                 <GlassCard className="p-3 md:p-4 w-full">
                                     <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Precipitation</h2>
-                                    {renderPrecipitationChart()}
+                                    <PrecipitationChart
+                                        timestamps={weatherData.hourly.timestamps}
+                                        precipitationProbabilities={weatherData.hourly.precipitation_probability}
+                                    />
                                 </GlassCard>
                             </ErrorBoundary>
 
@@ -160,8 +153,7 @@ const DashboardContent: React.FC<{
                                 <GlassCard className="p-3 md:p-4 w-full">
                                     <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Wind</h2>
                                     <WindChart
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
+                                        weatherData={weatherData}
                                     />
                                 </GlassCard>
                             </ErrorBoundary>
@@ -170,8 +162,7 @@ const DashboardContent: React.FC<{
                                 <GlassCard className="p-3 md:p-4 w-full">
                                     <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Weather Map</h2>
                                     <WeatherMap
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
+                                        weatherData={weatherData}
                                     />
                                 </GlassCard>
                             </ErrorBoundary>
@@ -180,8 +171,7 @@ const DashboardContent: React.FC<{
                                 <GlassCard className="p-3 md:p-4 w-full">
                                     <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>7-Day Forecast</h2>
                                     <DailyForecastCards
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
+                                        weatherData={weatherData}
                                     />
                                 </GlassCard>
                             </ErrorBoundary>

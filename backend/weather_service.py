@@ -13,7 +13,17 @@ def fetch_current_weather(latitude: float, longitude: float) -> Dict[str, Any]:
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "current": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "wind_speed_10m", "wind_direction_10m", "is_day"],
+        "current": [
+            "temperature_2m",
+            "apparent_temperature",
+            "relative_humidity_2m",
+            "precipitation",
+            "weather_code",
+            "wind_speed_10m",
+            "wind_direction_10m",
+            "surface_pressure",
+            "is_day"
+        ],
         "timezone": "auto"
     }
 
@@ -21,18 +31,20 @@ def fetch_current_weather(latitude: float, longitude: float) -> Dict[str, Any]:
     response.raise_for_status()
     data = response.json()
 
-    # Transform the response to our API format
+    # Transform the response to match frontend's expected format
     current = data.get("current", {})
 
     return {
-        "temperature": current.get("temperature_2m"),
-        "humidity": current.get("relative_humidity_2m"),
+        "temperature_2m": current.get("temperature_2m"),
+        "apparent_temperature": current.get("apparent_temperature"),
+        "relative_humidity_2m": current.get("relative_humidity_2m"),
         "precipitation": current.get("precipitation"),
-        "weatherCode": current.get("weather_code"),
-        "windSpeed": current.get("wind_speed_10m"),
-        "windDirection": current.get("wind_direction_10m"),
-        "isDay": current.get("is_day") == 1,
-        "time": current.get("time")
+        "weather_code": current.get("weather_code"),
+        "wind_speed_10m": current.get("wind_speed_10m"),
+        "wind_direction_10m": current.get("wind_direction_10m"),
+        "surface_pressure": current.get("surface_pressure"),
+        "is_day": current.get("is_day"),
+        "timestamp": current.get("time")
     }
 
 def fetch_hourly_forecast(latitude: float, longitude: float, hours: int = 24) -> Dict[str, Any]:
@@ -43,7 +55,22 @@ def fetch_hourly_forecast(latitude: float, longitude: float, hours: int = 24) ->
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "hourly": ["temperature_2m", "precipitation_probability", "precipitation", "weather_code", "is_day"],
+        "hourly": [
+            "temperature_2m",
+            "apparent_temperature",
+            "precipitation_probability",
+            "precipitation",
+            "rain",
+            "showers",
+            "snowfall",
+            "cloud_cover",
+            "weather_code",
+            "wind_speed_10m",
+            "wind_direction_10m",
+            "relative_humidity_2m",
+            "wind_gusts_10m",
+            "is_day"
+        ],
         "forecast_hours": hours,
         "timezone": "auto"
     }
@@ -52,15 +79,26 @@ def fetch_hourly_forecast(latitude: float, longitude: float, hours: int = 24) ->
     response.raise_for_status()
     data = response.json()
 
-    # Transform the response to our API format
+    # Transform the response to match frontend's expected format
     hourly = data.get("hourly", {})
+    times = hourly.get("time", [])[:hours]
 
     return {
-        "time": hourly.get("time", [])[:hours],
-        "temperature": hourly.get("temperature_2m", [])[:hours],
+        "timestamps": times,
+        "temperature_2m": hourly.get("temperature_2m", [])[:hours],
+        "apparent_temperature": hourly.get("apparent_temperature", [])[:hours],
+        "precipitation_probability": hourly.get("precipitation_probability", [])[:hours],
         "precipitation": hourly.get("precipitation", [])[:hours],
-        "weatherCode": hourly.get("weather_code", [])[:hours],
-        "isDay": [is_day == 1 for is_day in hourly.get("is_day", [])[:hours]]
+        "rain": hourly.get("rain", [])[:hours],
+        "showers": hourly.get("showers", [])[:hours],
+        "snowfall": hourly.get("snowfall", [])[:hours],
+        "cloud_cover": hourly.get("cloud_cover", [])[:hours],
+        "weather_code": hourly.get("weather_code", [])[:hours],
+        "wind_speed_10m": hourly.get("wind_speed_10m", [])[:hours],
+        "wind_direction_10m": hourly.get("wind_direction_10m", [])[:hours],
+        "relative_humidity_2m": hourly.get("relative_humidity_2m", [])[:hours],
+        "wind_gusts_10m": hourly.get("wind_gusts_10m", [])[:hours],
+        "is_day": hourly.get("is_day", [])[:hours]
     }
 
 def fetch_historical_weather(
@@ -75,37 +113,39 @@ def fetch_historical_weather(
     start_date_str = start_date.strftime("%Y-%m-%d")
     end_date_str = end_date.strftime("%Y-%m-%d")
 
-    endpoint = f"{OPEN_METEO_URL}/archive"
+    endpoint = f"{OPEN_METEO_URL}/forecast"  # Changed to forecast endpoint for daily forecast
 
     params = {
         "latitude": latitude,
         "longitude": longitude,
+        "daily": [
+            "temperature_2m_max",
+            "temperature_2m_min",
+            "precipitation_sum",
+            "precipitation_probability_max",
+            "wind_speed_10m_max",
+            "wind_direction_10m_dominant",
+            "weather_code"
+        ],
+        "timezone": "auto",
         "start_date": start_date_str,
-        "end_date": end_date_str,
-        "daily": ["temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                  "precipitation_sum", "rain_sum", "snowfall_sum",
-                  "precipitation_hours", "weather_code"],
-        "timezone": "auto"
+        "end_date": end_date_str
     }
 
     response = requests.get(endpoint, params=params)
     response.raise_for_status()
     data = response.json()
 
-    # Transform the response to our API format
+    # Transform the response to match frontend's expected format
     daily = data.get("daily", {})
 
     return {
-        "latitude": data.get("latitude"),
-        "longitude": data.get("longitude"),
-        "timezone": data.get("timezone"),
-        "dates": daily.get("time", []),
-        "temperatureMax": daily.get("temperature_2m_max", []),
-        "temperatureMin": daily.get("temperature_2m_min", []),
-        "temperatureMean": daily.get("temperature_2m_mean", []),
-        "precipitationSum": daily.get("precipitation_sum", []),
-        "rainSum": daily.get("rain_sum", []),
-        "snowfallSum": daily.get("snowfall_sum", []),
-        "precipitationHours": daily.get("precipitation_hours", []),
-        "weatherCode": daily.get("weather_code", [])
+        "time": daily.get("time", []),
+        "temperature_2m_max": daily.get("temperature_2m_max", []),
+        "temperature_2m_min": daily.get("temperature_2m_min", []),
+        "precipitation_sum": daily.get("precipitation_sum", []),
+        "precipitation_probability_max": daily.get("precipitation_probability_max", []),
+        "wind_speed_10m_max": daily.get("wind_speed_10m_max", []),
+        "wind_direction_10m_dominant": daily.get("wind_direction_10m_dominant", []),
+        "weather_code": daily.get("weather_code", [])
     }

@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import print styles */
-@import './print.css';
-
 /* Animation effects for weather */
 @keyframes rainDrop {
     0% {
@@ -51,19 +48,6 @@
     100% {
         transform: translateY(25px) translateX(10px);
         opacity: 0;
-    }
-}
-
-/* Print-specific hide/show classes */
-@media screen {
-    .print-only {
-        display: none !important;
-    }
-}
-
-@media print {
-    .screen-only {
-        display: none !important;
     }
 }
 
