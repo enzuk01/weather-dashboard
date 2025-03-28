@@ -23,6 +23,27 @@
 - Language translation system
 - Unit conversion real-time updates
 
+## [1.3.2] - 2024-03-21
+
+### Added
+
+- Added proper API endpoint routing in backend Flask application
+- Added comprehensive error handling for weather data endpoints
+- Added version consistency checks across frontend and backend
+- Added improved documentation for API endpoints in README
+
+### Fixed
+
+- Fixed 404 errors in weather data endpoints
+- Fixed mismatched API endpoint URLs between frontend and backend
+- Fixed version inconsistencies between package files
+
+### Changed
+
+- Updated backend routes to match frontend expectations
+- Updated project structure documentation
+- Standardized error responses across all API endpoints
+
 ## [1.3.1] - 2024-03-28
 
 ### Changed
