@@ -40,7 +40,7 @@
 
 1. **Update Server Scripts to Use Utils**:
    - [x] Modify `direct-start.sh` to source `scripts/server-utils.sh`
-   - [ ] Remove duplicated functions from `direct-start.sh`
+   - [x] Remove duplicated functions from `direct-start.sh`
    - [x] Ensure all scripts use consistent approach for:
      - Port detection
      - Process management
@@ -51,7 +51,7 @@
    - [x] Move `direct-start.sh` to `scripts/`
    - [x] Create symbolic links for backward compatibility
 
-### Phase 4: Testing and Documentation (In Progress)
+### Phase 4: Testing and Documentation (Completed)
 
 1. **Test All Server Scripts**:
    - [x] Ensure `server-restart.sh` works as expected
@@ -59,20 +59,20 @@
    - [x] Test all symbolic links
 
 2. **Update Documentation**:
-   - [ ] Update README.md to reference scripts in their new locations
-   - [ ] Add comments to scripts to indicate their purpose
-   - [ ] Create a server management guide in the docs/ directory
+   - [x] Update README.md to reference scripts in their new locations
+   - [x] Add comments to scripts to indicate their purpose
+   - [x] Create a server management guide (SERVER_MANAGEMENT.md)
 
-## Implementation Steps (Progress: 7/8)
+## Implementation Steps (Progress: 8/8)
 
 1. [x] Create backups of all scripts
 2. [x] Move server-utils.sh to scripts/ directory
 3. [x] Update direct-start.sh to source scripts/server-utils.sh
-4. [ ] Remove duplicated functions from direct-start.sh (planned for future update)
+4. [x] Remove duplicated functions from direct-start.sh
 5. [x] Move direct-start.sh to scripts/ directory
 6. [x] Create symbolic links for backward compatibility
 7. [x] Test all scripts
-8. [ ] Update documentation
+8. [x] Update documentation
 
 ## Future Improvements
 
@@ -94,4 +94,7 @@ March 29, 2023:
 - Moved `server-utils.sh` to `scripts/` directory and created a symbolic link
 - Modified `direct-start.sh` to source utility functions from `scripts/server-utils.sh`
 - Moved `direct-start.sh` to `scripts/` directory and created a symbolic link
-- Tested all changes with `./direct-start.sh --test` to ensure functionality
+- Replaced duplicated functions in direct-start.sh with calls to equivalent functions in server-utils.sh
+- Created comprehensive SERVER_MANAGEMENT.md guide with detailed usage instructions
+- Updated README.md to reference the new script locations
+- Tested all scripts and symbolic links to ensure functionality
