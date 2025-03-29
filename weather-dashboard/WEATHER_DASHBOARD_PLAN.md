@@ -61,11 +61,11 @@
 
 ## Preferred Server Management Solution
 
-The `direct-start.sh` script is now the recommended way to start and manage the weather dashboard servers:
+The `server-restart.sh` script is now the recommended way to start and manage the weather dashboard servers:
 
 ```bash
 # From the project root directory
-./direct-start.sh
+./server-restart.sh
 ```
 
 This script:
@@ -82,7 +82,7 @@ This script:
 
 ### Completed Server Management Improvements
 
-1. **Direct Server Management (`direct-start.sh`)**
+1. **Direct Server Management (`server-restart.sh`)**
    - Auto-kill existing processes and prevent port conflicts
    - Enhanced process monitoring and auto-restart
    - Proper logging to files for troubleshooting
