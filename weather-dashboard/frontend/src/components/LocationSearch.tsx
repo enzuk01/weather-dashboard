@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import GlassCard from './ui/GlassCard';
+import { MapPinIcon } from '@heroicons/react/24/solid';
 
 export interface Location {
     name: string;
@@ -24,6 +25,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     const [activeIndex, setActiveIndex] = useState(-1);
     const [showResults, setShowResults] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
 
     const searchInputRef = useRef<HTMLInputElement>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
@@ -158,41 +160,109 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         };
     }, []);
 
+    const handleUseMyLocation = async () => {
+        try {
+            setIsGettingLocation(true);
+            setError(null);
+
+            if (!('geolocation' in navigator)) {
+                throw new Error('Geolocation is not supported by your browser');
+            }
+
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 300000
+                });
+            });
+
+            // Use OpenStreetMap Nominatim for reverse geocoding
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to get location details');
+            }
+
+            const data = await response.json();
+            const locationName = data.address.city || data.address.town || data.address.village || data.address.suburb || 'Unknown Location';
+            const country = data.address.country || 'Unknown Country';
+
+            const location: Location = {
+                name: locationName,
+                country: country,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+
+            handleSelectLocation(location);
+        } catch (error: any) {
+            console.error('Error getting location:', error);
+            setError(error.message || 'Failed to get your location');
+        } finally {
+            setIsGettingLocation(false);
+        }
+    };
+
     return (
         <div className={`relative ${className}`}>
             <GlassCard className="p-3">
-                <label
-                    htmlFor="location-search"
-                    className="sr-only"
-                >
-                    Search for a location
-                </label>
-                <div className="relative">
-                    <input
-                        id="location-search"
-                        ref={searchInputRef}
-                        type="text"
-                        placeholder="Search for a location..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        onKeyDown={handleKeyDown}
-                        onFocus={() => searchTerm.length > 2 && setShowResults(true)}
-                        className="w-full bg-transparent text-white border border-white/30 rounded-md py-2 px-4
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      placeholder-white/50"
-                        aria-autocomplete="list"
-                        aria-controls="location-search-results"
-                        aria-expanded={showResults ? 'true' : 'false'}
-                        aria-activedescendant={activeIndex >= 0 ? `location-result-${activeIndex}` : undefined}
-                        aria-describedby={error ? 'location-search-error' : undefined}
-                        autoComplete="off"
-                    />
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <label
+                            htmlFor="location-search"
+                            className="sr-only"
+                        >
+                            Search for a location
+                        </label>
+                        <div className="relative">
+                            <input
+                                id="location-search"
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder="Search for a location..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => searchTerm.length > 2 && setShowResults(true)}
+                                className="w-full bg-transparent text-white border border-white/30 rounded-md py-2 px-4
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                                placeholder-white/50"
+                                aria-autocomplete="list"
+                                aria-controls="location-search-results"
+                                aria-expanded={showResults ? 'true' : 'false'}
+                                aria-activedescendant={activeIndex >= 0 ? `location-result-${activeIndex}` : undefined}
+                                aria-describedby={error ? 'location-search-error' : undefined}
+                                autoComplete="off"
+                            />
 
-                    {isSearching && (
-                        <div className="absolute right-3 top-2">
-                            <div className="animate-spin h-5 w-5 border-2 border-white/40 border-t-white rounded-full"></div>
+                            {isSearching && (
+                                <div className="absolute right-3 top-2">
+                                    <div className="animate-spin h-5 w-5 border-2 border-white/40 border-t-white rounded-full"></div>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
+
+                    <button
+                        onClick={handleUseMyLocation}
+                        disabled={isGettingLocation}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md border border-white/30
+                            ${isGettingLocation
+                                ? 'bg-blue-500/50 cursor-wait'
+                                : 'hover:bg-white/10 active:bg-white/20'
+                            } transition-colors`}
+                        aria-label="Use my location"
+                    >
+                        <MapPinIcon className="h-5 w-5" />
+                        {isGettingLocation ? (
+                            <div className="animate-spin h-4 w-4 border-2 border-white/40 border-t-white rounded-full"></div>
+                        ) : (
+                            <span>Use My Location</span>
+                        )}
+                    </button>
                 </div>
 
                 {error && (
@@ -207,15 +277,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                     id="location-search-results"
                     ref={resultsRef}
                     className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-slate-900/90 backdrop-blur-md rounded-md
-                   border border-white/20 shadow-lg"
+                        border border-white/20 shadow-lg"
                     role="listbox"
                 >
                     {searchResults.map((location, index) => (
                         <div
                             key={`${location.name}-${location.country}-${index}`}
                             id={`location-result-${index}`}
-                            className={`px-4 py-2 cursor-pointer ${index === activeIndex ? 'bg-blue-500/30' : 'hover:bg-white/10'
-                                }`}
+                            className={`px-4 py-2 cursor-pointer ${index === activeIndex ? 'bg-blue-500/30' : 'hover:bg-white/10'}`}
                             onClick={() => handleSelectLocation(location)}
                             onMouseEnter={() => setActiveIndex(index)}
                             role="option"

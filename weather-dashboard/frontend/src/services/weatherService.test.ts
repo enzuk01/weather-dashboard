@@ -34,7 +34,7 @@ describe('weatherService', () => {
             const result = await fetchCurrentWeather(40.7128, -74.0060);
 
             expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5001/weather/current?lat=40.7128&lon=-74.006'
+                'http://localhost:5003/api/weather/current?latitude=40.7128&longitude=-74.006'
             );
             expect(result).toEqual(currentWeatherFixture);
         });
@@ -78,7 +78,7 @@ describe('weatherService', () => {
             const result = await fetchHourlyForecast(40.7128, -74.0060);
 
             expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5001/weather/forecast/hourly?lat=40.7128&lon=-74.006&hours=24'
+                'http://localhost:5003/api/weather/forecast/hourly?latitude=40.7128&longitude=-74.006&hours=24'
             );
             expect(result).toEqual(hourlyForecastFixture);
         });
@@ -122,7 +122,7 @@ describe('weatherService', () => {
             const result = await fetchWeatherCodes();
 
             expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:5001/weather/codes'
+                'http://localhost:5003/api/weather/codes'
             );
             // Convert the fixture object to a Map for comparison
             const expectedMap = new Map(Object.entries(weatherCodesFixture).map(([key, value]) => [parseInt(key), value]));

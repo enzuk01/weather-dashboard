@@ -1,55 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchDailyForecast } from '../services/weatherService';
 import { DailyForecastData } from '../types/weatherTypes';
-import GlassCard from './ui/GlassCard';
 import LoadingState from './ui/LoadingState';
 import ErrorState from './ui/ErrorState';
 import WeatherIcon from './WeatherIcon';
+import { useSettings } from '../contexts/SettingsContext';
 import WindDirectionIndicator from './WindDirectionIndicator';
-import { useSettings, convertTemperature, convertWindSpeed } from '../contexts/SettingsContext';
+import { convertTemperature, convertWindSpeed } from '../contexts/SettingsContext';
 
 interface DailyForecastCardsProps {
     latitude: number;
     longitude: number;
-    days?: number;
 }
 
-const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
-    latitude,
-    longitude,
-    days = 7
-}) => {
+const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({ latitude, longitude }) => {
     const [forecastData, setForecastData] = useState<DailyForecastData | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { temperatureUnit, windSpeedUnit } = useSettings();
 
     useEffect(() => {
-        const fetchForecast = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await fetchDailyForecast(latitude, longitude, days);
+                const data = await fetchDailyForecast(latitude, longitude);
                 setForecastData(data);
                 setError(null);
             } catch (err) {
                 console.error('Error fetching daily forecast:', err);
-                setError('Failed to fetch daily forecast data');
+                setError('Failed to load daily forecast data');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchForecast();
-    }, [latitude, longitude, days]);
+        fetchData();
+    }, [latitude, longitude]);
 
-    const formatDay = (timestamp: string): string => {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString([], { weekday: 'short' });
+    if (loading) {
+        return <LoadingState />;
+    }
+
+    if (error) {
+        return <ErrorState message={error} />;
+    }
+
+    if (!forecastData) {
+        return <ErrorState message="No forecast data available" />;
+    }
+
+    // Verify we have the required data
+    if (!forecastData.time || forecastData.time.length === 0) {
+        return <ErrorState message="Daily forecast data is incomplete" />;
+    }
+
+    // Safely get array values with defaults
+    const safeGet = <T extends unknown>(arr: T[] | undefined, index: number, defaultValue: T): T => {
+        if (!arr || index >= arr.length) return defaultValue;
+        return arr[index];
     };
 
-    const formatDate = (timestamp: string): string => {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    // Format date to display day name
+    const formatDate = (date: string) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('en-US', { weekday: 'short' });
     };
 
     // Format temperature with unit
@@ -66,73 +80,38 @@ const DailyForecastCards: React.FC<DailyForecastCardsProps> = ({
         return `${Math.round(speed)}`;
     };
 
-    if (loading) {
-        return <LoadingState message="Loading 7-day forecast..." />;
-    }
-
-    if (error) {
-        return (
-            <ErrorState
-                message="Unable to load forecast data"
-                retryAction={() => window.location.reload()}
-            />
-        );
-    }
-
-    if (!forecastData) {
-        return (
-            <ErrorState
-                message="No forecast data available"
-                retryAction={() => window.location.reload()}
-            />
-        );
-    }
-
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3 w-full">
-            {forecastData.time.map((time, index) => (
-                <div key={time} className="bg-slate-800/40 rounded-lg p-2 sm:p-3 text-center flex flex-col justify-between h-full">
-                    <div>
-                        <div className="text-white font-medium">
-                            {formatDay(time)}
-                        </div>
-                        <div className="text-white/70 text-xs sm:text-sm mb-1 sm:mb-2">
+        <div className="grid grid-cols-7 gap-2">
+            {forecastData.time.map((time, index) => {
+                const maxTemp = safeGet(forecastData.temperature_2m_max, index, undefined);
+                const minTemp = safeGet(forecastData.temperature_2m_min, index, undefined);
+                const precipProb = safeGet(forecastData.precipitation_probability_max, index, 0);
+                const weatherCode = safeGet(forecastData.weather_code, index, 0);
+
+                return (
+                    <div key={time} className="flex flex-col items-center p-2 rounded-lg bg-white/10 backdrop-blur-sm">
+                        <div className="text-sm font-medium text-white/90 mb-1">
                             {formatDate(time)}
                         </div>
-                        <div className="flex justify-center mb-2 sm:mb-3">
-                            <WeatherIcon
-                                weatherCode={forecastData.weather_code[index] ?? 0}
-                                isDay={true}
-                                size="md"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-white font-bold text-base sm:text-lg">
-                                {formatTemperature(forecastData.temperature_2m_max[index])}
+                        <WeatherIcon
+                            weatherCode={weatherCode}
+                            isDay={true}
+                            size="md"
+                        />
+                        <div className="mt-1 text-sm">
+                            <span className="text-white/90">
+                                {formatTemperature(maxTemp)}
                             </span>
-                            <span className="text-white/70 text-sm">
-                                {formatTemperature(forecastData.temperature_2m_min[index])}
+                            <span className="text-white/60 ml-1">
+                                {formatTemperature(minTemp)}
                             </span>
                         </div>
-                        <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs sm:text-sm text-white/70">
-                            <div className="flex items-center">
-                                {forecastData.wind_direction_10m_dominant[index] !== undefined && (
-                                    <WindDirectionIndicator
-                                        direction={forecastData.wind_direction_10m_dominant[index]}
-                                        size="sm"
-                                    />
-                                )}
-                                <span className="ml-1">{formatWindSpeed(forecastData.wind_speed_10m_max[index])}</span>
-                            </div>
-                            <div>
-                                <span>{forecastData.precipitation_probability_max[index] !== undefined ? Math.round(forecastData.precipitation_probability_max[index]) : 'N/A'}%</span>
-                            </div>
+                        <div className="text-xs text-white/60 mt-1">
+                            {Math.round(precipProb)}%
                         </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 };

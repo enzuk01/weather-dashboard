@@ -82,8 +82,8 @@ const DashboardContent: React.FC<{
 
             return (
                 <PrecipitationChart
-                    timestamps={hourlyData.timestamps}
-                    precipitationProbabilities={hourlyData.precipitation_probability}
+                    latitude={location.latitude}
+                    longitude={location.longitude}
                 />
             );
         };
@@ -207,113 +207,6 @@ function App() {
 }
 
 const AppContent: React.FC = () => {
-    const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isLoadingLocation, setIsLoadingLocation] = useState(true);
-    const [locationError, setLocationError] = useState<string | null>(null);
-    const { logger } = useLogger();
-
-    useEffect(() => {
-        const initializeLocation = async () => {
-            try {
-                setIsLoadingLocation(true);
-                setLocationError(null);
-                await logger.info('Initializing geolocation');
-
-                if ('geolocation' in navigator) {
-                    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(
-                            resolve,
-                            (error) => {
-                                switch (error.code) {
-                                    case error.PERMISSION_DENIED:
-                                        reject(new Error('Location access was denied. Please enable location access in your browser settings.'));
-                                        break;
-                                    case error.POSITION_UNAVAILABLE:
-                                        reject(new Error('Location information is unavailable. Please try again.'));
-                                        break;
-                                    case error.TIMEOUT:
-                                        reject(new Error('Location request timed out. Please check your connection and try again.'));
-                                        break;
-                                    default:
-                                        reject(error);
-                                }
-                            },
-                            {
-                                enableHighAccuracy: false, // Set to false for faster response
-                                timeout: 10000,
-                                maximumAge: 300000 // Cache for 5 minutes
-                            }
-                        );
-                    });
-
-                    try {
-                        // Use OpenStreetMap Nominatim for reverse geocoding
-                        const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
-                        );
-
-                        if (!response.ok) {
-                            throw new Error('Failed to get location details');
-                        }
-
-                        const data = await response.json();
-                        const locationName = data.address.city || data.address.town || data.address.village || data.address.suburb || 'Unknown Location';
-                        const country = data.address.country || 'Unknown Country';
-
-                        const newLocation: Location = {
-                            name: locationName,
-                            country: country,
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        };
-
-                        await logger.info('Location details retrieved successfully', newLocation);
-                        setCurrentLocation(newLocation);
-                    } catch (geocodeError) {
-                        // If reverse geocoding fails, still use the coordinates but with placeholder names
-                        const newLocation: Location = {
-                            name: 'Current Location',
-                            country: 'Unknown',
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        };
-
-                        await logger.warn('Failed to get location details, using coordinates only', { error: geocodeError });
-                        setCurrentLocation(newLocation);
-                    }
-                } else {
-                    throw new Error('Geolocation is not supported by your browser. Please try a different browser.');
-                }
-            } catch (error: any) {
-                console.error('Failed to get geolocation:', error);
-                setLocationError(error.message || 'Unable to detect your location. Using default location.');
-                await logger.error('Failed to get geolocation', { error });
-
-                // Set default location (London) if geolocation fails
-                setCurrentLocation({
-                    name: 'London',
-                    country: 'United Kingdom',
-                    latitude: 51.5074,
-                    longitude: -0.1278
-                });
-            } finally {
-                setIsLoadingLocation(false);
-            }
-        };
-
-        initializeLocation();
-
-        return () => {
-            logger.info('Cleaning up location resources').catch(console.error);
-        };
-    }, [logger]);
-
-    const handleLocationChange = async (location: Location) => {
-        setCurrentLocation(location);
-        await logger.info('Location changed', { location }).catch(console.error);
-    };
-
     const defaultLocation: Location = {
         name: 'London',
         country: 'United Kingdom',
@@ -321,12 +214,21 @@ const AppContent: React.FC = () => {
         longitude: -0.1278
     };
 
-    const location = currentLocation || defaultLocation;
+    const [currentLocation, setCurrentLocation] = useState<Location>(defaultLocation);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [locationError, setLocationError] = useState<string | null>(null);
+    const { logger } = useLogger();
+
+    const handleLocationChange = async (location: Location) => {
+        setCurrentLocation(location);
+        await logger.info('Location changed', { location }).catch(console.error);
+    };
 
     if (isLoadingLocation) {
         return (
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-                <LoadingState message="Detecting your location..." />
+                <LoadingState message="Updating location..." />
             </div>
         );
     }
@@ -336,7 +238,7 @@ const AppContent: React.FC = () => {
             <ErrorBoundary>
                 <Header
                     title="Weather Dashboard"
-                    currentLocation={location}
+                    currentLocation={currentLocation}
                     onLocationChange={handleLocationChange}
                     onSettingsClick={() => setIsSettingsOpen(true)}
                 />
@@ -355,7 +257,7 @@ const AppContent: React.FC = () => {
             <ErrorBoundary>
                 <main className="container mx-auto px-4 py-8">
                     <DashboardContent
-                        location={location}
+                        location={currentLocation}
                         isSettingsOpen={isSettingsOpen}
                         onSettingsClose={() => setIsSettingsOpen(false)}
                     />

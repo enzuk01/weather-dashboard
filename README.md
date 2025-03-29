@@ -392,25 +392,36 @@ For a hotfix:
 
 For easier development, the project includes scripts to manage server processes:
 
-1. To start both backend and frontend servers with automatic process management:
+1. **RECOMMENDED**: Use the direct-start script for the most reliable server management:
 
    ```bash
    cd weather-dashboard
-   ./start-servers.sh
+   ./direct-start.sh
    ```
 
-2. For quick frontend-only testing:
+   **Benefits of direct-start.sh**:
+   - Automatically terminates existing processes on ports 3000 and 5003
+   - Starts both frontend and backend servers with proper configuration
+   - Implements health checks to verify successful startup
+   - Handles process management without relying on PM2
+   - Creates detailed logs in `logs/frontend.log` and `logs/backend.log`
+   - Ensures graceful shutdown when terminated with Ctrl+C
+
+2. For production-like environments with PM2:
+
+   ```bash
+   cd weather-dashboard
+   pm2 start ecosystem.config.js
+   ```
+
+3. For quick frontend-only testing:
 
    ```bash
    cd weather-dashboard
    ./start-frontend.sh
    ```
 
-These scripts automatically:
-
-- Kill any existing React/Python processes to prevent port conflicts
-- Start the required servers
-- Provide visual feedback on the terminal
+**IMPORTANT**: Always use the direct-start.sh script during development to prevent port conflicts and ensure consistent behavior after server restarts. Manual server management can lead to inconsistent state and errors.
 
 ### Using NPM Scripts from Root
 
