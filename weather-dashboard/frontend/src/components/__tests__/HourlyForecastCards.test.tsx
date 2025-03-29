@@ -13,6 +13,7 @@ const mockFetchHourlyForecast = fetchHourlyForecast as jest.MockedFunction<typeo
 
 describe('HourlyForecastCards', () => {
     const mockHourlyData: HourlyForecastData = {
+        time: Array.from({ length: 24 }, (_, i) => new Date(Date.now() + i * 3600000).toISOString()),
         timestamps: Array.from({ length: 24 }, (_, i) => new Date(Date.now() + i * 3600000).toISOString()),
         temperature_2m: Array.from({ length: 24 }, (_, i) => 20 + i),
         apparent_temperature: Array.from({ length: 24 }, (_, i) => 22 + i),
@@ -75,7 +76,7 @@ describe('HourlyForecastCards', () => {
         });
 
         // Check if the first hour's data is displayed
-        const firstHourTemp = await screen.findByText(`${Math.round(mockHourlyData.temperature_2m[0])}°C`);
+        const firstHourTemp = await screen.findByText(`${mockHourlyData.temperature_2m[0].toFixed(1)}°C`);
         expect(firstHourTemp).toBeInTheDocument();
 
         // Verify multiple hour cards are rendered
@@ -93,6 +94,6 @@ describe('HourlyForecastCards', () => {
         // Wait for error message
         const errorMessage = await screen.findByText('Something went wrong');
         expect(errorMessage).toBeInTheDocument();
-        expect(screen.getByText('Unable to load forecast data')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load hourly forecast data')).toBeInTheDocument();
     });
 });
