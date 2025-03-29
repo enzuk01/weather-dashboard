@@ -6,6 +6,7 @@ import PrecipitationChart from './components/PrecipitationChart';
 import DailyForecastCards from './components/DailyForecastCards';
 import WindChart from './components/WindChart';
 import WeatherMap from './components/WeatherMap';
+import WeatherTabs from './components/WeatherTabs';
 import LocationSearch, { Location } from './components/LocationSearch';
 import FavoriteLocations from './components/FavoriteLocations';
 import Header from './components/Header';
@@ -66,28 +67,6 @@ const DashboardContent: React.FC<{
             loadHourlyData();
         }, [location.latitude, location.longitude]);
 
-        // Render the precipitation chart component with appropriate states
-        const renderPrecipitationChart = () => {
-            if (precipLoading) {
-                return <LoadingState message="Loading precipitation data..." />;
-            }
-
-            if (precipError) {
-                return <ErrorState message={precipError} retryAction={() => window.location.reload()} />;
-            }
-
-            if (!hourlyData) {
-                return <ErrorState message="No precipitation data available" retryAction={() => window.location.reload()} />;
-            }
-
-            return (
-                <PrecipitationChart
-                    latitude={location.latitude}
-                    longitude={location.longitude}
-                />
-            );
-        };
-
         return (
             <>
                 {/* Settings Modal */}
@@ -137,53 +116,13 @@ const DashboardContent: React.FC<{
                             </div>
                         </div>
 
-                        {/* Full-width components stacked vertically */}
-                        <div className="mt-3 md:mt-4 space-y-3 md:space-y-4">
+                        {/* Weather tabs section */}
+                        <div className="mt-3 md:mt-4">
                             <ErrorBoundary>
-                                <GlassCard className="p-3 md:p-4 w-full">
-                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>24-Hour Forecast</h2>
-                                    <HourlyForecastCards
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
-                                    />
-                                </GlassCard>
-                            </ErrorBoundary>
-
-                            <ErrorBoundary>
-                                <GlassCard className="p-3 md:p-4 w-full">
-                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Precipitation</h2>
-                                    {renderPrecipitationChart()}
-                                </GlassCard>
-                            </ErrorBoundary>
-
-                            <ErrorBoundary>
-                                <GlassCard className="p-3 md:p-4 w-full">
-                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Wind</h2>
-                                    <WindChart
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
-                                    />
-                                </GlassCard>
-                            </ErrorBoundary>
-
-                            <ErrorBoundary>
-                                <GlassCard className="p-3 md:p-4 w-full">
-                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Weather Map</h2>
-                                    <WeatherMap
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
-                                    />
-                                </GlassCard>
-                            </ErrorBoundary>
-
-                            <ErrorBoundary>
-                                <GlassCard className="p-3 md:p-4 w-full">
-                                    <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>7-Day Forecast</h2>
-                                    <DailyForecastCards
-                                        latitude={location.latitude}
-                                        longitude={location.longitude}
-                                    />
-                                </GlassCard>
+                                <WeatherTabs
+                                    latitude={location.latitude}
+                                    longitude={location.longitude}
+                                />
                             </ErrorBoundary>
                         </div>
                     </div>
@@ -255,13 +194,11 @@ const AppContent: React.FC = () => {
             </ErrorBoundary>
 
             <ErrorBoundary>
-                <main className="container mx-auto px-4 py-8">
-                    <DashboardContent
-                        location={currentLocation}
-                        isSettingsOpen={isSettingsOpen}
-                        onSettingsClose={() => setIsSettingsOpen(false)}
-                    />
-                </main>
+                <DashboardContent
+                    location={currentLocation}
+                    isSettingsOpen={isSettingsOpen}
+                    onSettingsClose={() => setIsSettingsOpen(false)}
+                />
             </ErrorBoundary>
         </div>
     );

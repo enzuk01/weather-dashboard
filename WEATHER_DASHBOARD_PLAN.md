@@ -50,6 +50,7 @@
 - [x] Create sunrise/sunset visualization
 - [x] Make components fully responsive
 - [x] Standardize data sampling across components (12 data points, 2-hour intervals)
+- [x] Implement tabbed interface for better organization
 
 ## Advanced Features
 
@@ -70,6 +71,11 @@
 - [x] Add unit conversion (metric/imperial)
 - [x] Implement offline mode with service workers
 - [-] Add multi-language support
+- [-] Implement historical weather data visualization
+  - [x] Create UI framework with placeholder tab
+  - [ ] Design historical data API integration
+  - [ ] Develop historical data comparison tools
+  - [ ] Implement date range selection
 
 ## Visual Design and UX
 
@@ -81,6 +87,7 @@
 - [x] Enhanced visualization for precipitation probabilities
 - [x] Implement dark mode support
 - [x] Enhance accessibility features
+- [x] Implement tabbed interface for better content organization
 - [~] Create print-friendly layout
 
 ## Documentation and Testing
@@ -154,43 +161,41 @@
 12. ✅ Reorganized server scripts into scripts/ directory with backward compatibility
 13. ✅ Created comprehensive server management documentation
 14. ✅ Updated server utilities to improve health checks and diagnostics
+15. ✅ Implemented tabbed interface for dashboard organization
+16. ✅ Created placeholder for historical weather data visualization
+17. ✅ Improved UI layout and reduced vertical scrolling
 
 ## Next Development Focus (Current Sprint)
 
-1. **Weather Map Optimization**
+1. **Historical Weather Data Visualization**
+   - [ ] Design historical weather data API
+   - [ ] Create historical data fetching service
+   - [ ] Implement historical comparison visualization
+   - [ ] Complete UI for the "Historical" tab
+   - [ ] Add date range selection for historical data
+
+2. **Weather Map Optimization**
    - [ ] Implement efficient grid-based visualization
    - [ ] Optimize data point density calculations
    - [ ] Improve weather data fetching strategy
    - [ ] Add smooth transitions between data points
 
-2. **Testing and Documentation**
+3. **Testing and Documentation**
    - [ ] Complete unit tests for core components
    - [ ] Add integration tests
    - [ ] Create user documentation
    - [ ] Update API documentation
 
-3. **Internationalization**
+4. **Internationalization**
    - [ ] Set up i18n infrastructure
    - [ ] Create initial language packs
    - [ ] Add language selection UI
 
-4. **Performance Enhancements**
+5. **Performance Enhancements**
    - [ ] Implement advanced caching strategies
    - [ ] Add progressive loading for large datasets
    - [ ] Optimize map rendering performance
    - [ ] Add performance monitoring dashboard
-
-5. **Server Management**
-   - [x] Implement process management tools (pm2/supervisor)
-   - [x] Enhance port management
-   - [x] Add comprehensive logging
-   - [x] Implement health check endpoints
-   - [x] Add graceful shutdown
-   - [x] Use environment variables for configuration
-   - [x] Create centralized server utilities
-   - [x] Implement proper script organization
-   - [x] Ensure backward compatibility with symbolic links
-   - [x] Create detailed server management documentation
 
 ## Future Phase Planning
 

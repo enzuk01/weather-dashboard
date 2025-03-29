@@ -4,11 +4,19 @@
 
 ### Added
 
-- Future features planned for next version
+- New tabbed interface for organization and future expansion:
+  - "24 Hours" tab with hourly forecast, precipitation, wind, and weather map
+  - "7 Days" tab with weekly forecast
+  - "Historical" tab with coming soon placeholder
+- Improved UI structure with clear separation of daily, weekly, and historical data
+- Added UI framework for future historical weather data visualization
+- Enhanced tab design with responsive styling for mobile and desktop
 
 ### Changed
 
-- Planned improvements for next version
+- Reorganized dashboard components into logical tab groups
+- Improved UI layout with tabbed navigation
+- Enhanced user experience by reducing vertical scrolling
 
 ### Fixed
 
@@ -16,7 +24,10 @@
 
 ### Pending Implementation
 
-- Future enhancements under consideration
+- Historical weather data visualization
+- Weather map optimization
+- Language translation system
+- Unit conversion real-time updates
 
 ## [1.4.0] - 2024-03-29
 
