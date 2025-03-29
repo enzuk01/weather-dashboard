@@ -1,4 +1,4 @@
-name: Auto Merge
+name: Enable Auto-merge
 on:
   pull_request:
     types:
@@ -13,16 +13,9 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Wait for tests
-        run: sleep 10s
-
-      - name: Merge PR
-        uses: pascalgn/automerge-action@v0.15.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_METHOD: squash
-          MERGE_RETRY_SLEEP: 60000 # 1 minute
-          MERGE_DELETE_BRANCH: true
+      - name: Enable Auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: SQUASH
