@@ -9,6 +9,9 @@ import traceback
 import argparse
 from datetime import datetime, timedelta
 
+# Application version
+__version__ = "1.4.0"
+
 # Fixed port to avoid conflicts
 PORT = 5003
 

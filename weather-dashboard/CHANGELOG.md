@@ -18,6 +18,49 @@
 
 - Future enhancements under consideration
 
+## [1.4.0] - 2024-03-29
+
+### Added
+
+- Comprehensive server script refactoring:
+  - Moved all server scripts to dedicated scripts/ directory
+  - Created centralized server-utils.sh with shared utility functions
+  - Added symbolic links for backward compatibility
+  - Created comprehensive SERVER_MANAGEMENT.md guide
+- Enhanced server management capabilities:
+  - Added comprehensive server diagnostics
+  - Improved health check functions
+  - Enhanced port management utilities
+  - Added detailed error handling and reporting
+- Improved backend functionality:
+  - Fixed wind chill calculation in weather service
+  - Enhanced error handling in API endpoints
+  - Improved backend startup reliability
+
+### Changed
+
+- Reorganized server management scripts for better maintainability:
+  - Removed code duplication across scripts
+  - Standardized logging and error handling
+  - Improved script organization with clear separation of concerns
+  - Enhanced backward compatibility with symbolic links
+- Updated documentation with comprehensive server management guide
+- Improved error reporting in server startup scripts
+- Enhanced direct-start.sh to use centralized utility functions
+
+### Fixed
+
+- Fixed failing wind chill calculation in weather service tests
+- Fixed port management issues in server scripts
+- Fixed inconsistent naming conventions in utility functions
+- Fixed potential race conditions in server health checks
+
+### Pending Implementation
+
+- Weather map visualization improvements
+- Language translation system
+- Unit conversion real-time updates
+
 ## [1.3.3] - 2024-03-29
 
 ### Added
