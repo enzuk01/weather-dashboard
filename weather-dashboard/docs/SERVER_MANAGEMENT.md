@@ -171,7 +171,7 @@ The following improvements have been made to enhance server reliability:
    - Added fallback port mechanism for frontend server
 
 4. **Documentation**
-   - Updated release workflow with syntax validation steps
+   - Updated release workflow for solo developers
    - Added server management documentation
    - Enhanced troubleshooting guidance
 
@@ -189,4 +189,4 @@ The following improvements have been made to enhance server reliability:
 3. **Run syntax validation before deployment**
    - Use `scripts/check-python-syntax.sh` to validate Python files
    - Fix syntax errors before attempting to start servers
-   - Include syntax validation in release workflow
+   - Include syntax validation in release process
