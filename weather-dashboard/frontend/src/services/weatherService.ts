@@ -1,29 +1,39 @@
 import { API } from '../config/api';
 
 // Weather data interfaces
-interface Location {
+export interface Location {
     name: string;
     country: string;
     lat: number;
     lon: number;
 }
 
-interface WeatherData {
+// Common fields for weather data
+interface BaseWeatherData {
+    timestamp: number;
+    date: string;
+    time: string;
+}
+
+// Current weather data structure
+export interface CurrentWeatherData extends BaseWeatherData {
+    location: Location;
+    temperature_2m: number;
+    apparent_temperature: number;
+    relative_humidity_2m: number;
+    precipitation_probability: number;
+    precipitation: number;
+    weather_code: number;
+    cloud_cover: number;
+    wind_speed_10m: number;
+    wind_direction_10m: number;
+    is_day: number;
     temperature: number;
     humidity: number;
     wind_speed: number;
     wind_direction: number;
     description: string;
     icon: string;
-    is_day: number | boolean;
-    precipitation: number;
-    date: string;
-    time: string;
-    timestamp: number;
-}
-
-interface CurrentWeatherData extends WeatherData {
-    location: Location;
     sunrise: string;
     sunset: string;
     pressure: number;
@@ -31,11 +41,23 @@ interface CurrentWeatherData extends WeatherData {
     uv_index: number;
 }
 
-interface ForecastData extends WeatherData {
-    hour: number;
+// Hourly forecast data structure
+export interface HourlyForecastData {
+    timestamps: string[];
+    temperature_2m: number[];
+    apparent_temperature: number[];
+    precipitation_probability: number[];
+    precipitation: number[];
+    weather_code: number[];
+    is_day: number[];
+    cloud_cover: number[];
+    wind_speed_10m: number[];
+    wind_direction_10m: number[];
+    wind_gusts_10m?: number[];
 }
 
-interface DailyForecastData {
+// Daily forecast data structure
+export interface DailyForecastData {
     date: string;
     day: string;
     min_temp: number;
@@ -47,6 +69,28 @@ interface DailyForecastData {
     wind_direction: number;
     humidity: number;
     timestamp: number;
+
+    // Additional fields previously used
+    temperature_2m_max?: number;
+    temperature_2m_min?: number;
+    apparent_temperature_max?: number;
+    apparent_temperature_min?: number;
+    precipitation_sum?: number;
+    rain_sum?: number;
+    weather_code?: number;
+}
+
+// Legacy ForecastData structure to maintain compatibility
+export interface ForecastData extends BaseWeatherData {
+    hour: number;
+    temperature: number;
+    humidity: number;
+    wind_speed: number;
+    wind_direction: number;
+    description: string;
+    icon: string;
+    is_day: number | boolean;
+    precipitation: number;
 }
 
 // Cache management
@@ -69,6 +113,40 @@ const handleResponse = async (response: Response) => {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
     return await response.json();
+};
+
+// Weather code mapping for icon and description
+export const fetchWeatherCodes = () => {
+    return {
+        0: { description: "Clear sky", icon: "clear" },
+        1: { description: "Mainly clear", icon: "mainly-clear" },
+        2: { description: "Partly cloudy", icon: "partly-cloudy" },
+        3: { description: "Overcast", icon: "cloudy" },
+        45: { description: "Fog", icon: "fog" },
+        48: { description: "Depositing rime fog", icon: "fog" },
+        51: { description: "Light drizzle", icon: "drizzle" },
+        53: { description: "Moderate drizzle", icon: "drizzle" },
+        55: { description: "Dense drizzle", icon: "drizzle" },
+        56: { description: "Light freezing drizzle", icon: "freezing-drizzle" },
+        57: { description: "Dense freezing drizzle", icon: "freezing-drizzle" },
+        61: { description: "Slight rain", icon: "rain" },
+        63: { description: "Moderate rain", icon: "rain" },
+        65: { description: "Heavy rain", icon: "heavy-rain" },
+        66: { description: "Light freezing rain", icon: "freezing-rain" },
+        67: { description: "Heavy freezing rain", icon: "freezing-rain" },
+        71: { description: "Slight snow fall", icon: "snow" },
+        73: { description: "Moderate snow fall", icon: "snow" },
+        75: { description: "Heavy snow fall", icon: "heavy-snow" },
+        77: { description: "Snow grains", icon: "snow-grains" },
+        80: { description: "Slight rain showers", icon: "rain-showers" },
+        81: { description: "Moderate rain showers", icon: "rain-showers" },
+        82: { description: "Violent rain showers", icon: "heavy-rain-showers" },
+        85: { description: "Slight snow showers", icon: "snow-showers" },
+        86: { description: "Heavy snow showers", icon: "heavy-snow-showers" },
+        95: { description: "Thunderstorm", icon: "thunderstorm" },
+        96: { description: "Thunderstorm with slight hail", icon: "thunderstorm-hail" },
+        99: { description: "Thunderstorm with heavy hail", icon: "thunderstorm-hail" }
+    };
 };
 
 // API functions
@@ -102,7 +180,7 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<Cur
     }
 };
 
-export const fetchHourlyForecast = async (lat: number, lon: number): Promise<ForecastData[]> => {
+export const fetchHourlyForecast = async (lat: number, lon: number, hours: number = 24): Promise<HourlyForecastData> => {
     const cacheKey = getCacheKey(API.ENDPOINTS.HOURLY, lat, lon);
 
     // Check cache first
@@ -115,7 +193,7 @@ export const fetchHourlyForecast = async (lat: number, lon: number): Promise<For
     }
 
     try {
-        const url = buildApiUrl(`${API.ENDPOINTS.HOURLY}?lat=${lat}&lon=${lon}`);
+        const url = buildApiUrl(`${API.ENDPOINTS.HOURLY}?lat=${lat}&lon=${lon}&hours=${hours}`);
         const response = await fetch(url);
         const data = await handleResponse(response);
 
@@ -132,7 +210,7 @@ export const fetchHourlyForecast = async (lat: number, lon: number): Promise<For
     }
 };
 
-export const fetchDailyForecast = async (lat: number, lon: number): Promise<DailyForecastData[]> => {
+export const fetchDailyForecast = async (lat: number, lon: number, days: number = 7): Promise<DailyForecastData[]> => {
     const cacheKey = getCacheKey(API.ENDPOINTS.DAILY, lat, lon);
 
     // Check cache first
@@ -145,7 +223,7 @@ export const fetchDailyForecast = async (lat: number, lon: number): Promise<Dail
     }
 
     try {
-        const url = buildApiUrl(`${API.ENDPOINTS.DAILY}?lat=${lat}&lon=${lon}`);
+        const url = buildApiUrl(`${API.ENDPOINTS.DAILY}?lat=${lat}&lon=${lon}&days=${days}`);
         const response = await fetch(url);
         const data = await handleResponse(response);
 
@@ -175,12 +253,15 @@ export const searchLocation = async (query: string): Promise<Location[]> => {
 
 export const clearWeatherCache = () => {
     // Clear only weather-related cache entries
-    for (const key of memoryCache.keys()) {
+    const keysToDelete = [];
+    for (const key of Array.from(memoryCache.keys())) {
         if (key.includes(API.ENDPOINTS.CURRENT) ||
             key.includes(API.ENDPOINTS.HOURLY) ||
             key.includes(API.ENDPOINTS.DAILY)) {
-            memoryCache.delete(key);
+            keysToDelete.push(key);
         }
     }
+
+    keysToDelete.forEach(key => memoryCache.delete(key));
     console.log('Weather cache cleared');
 };
