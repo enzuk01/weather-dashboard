@@ -13,20 +13,17 @@ const mockFetchCurrentWeather = fetchCurrentWeather as jest.MockedFunction<typeo
 
 describe('CurrentWeatherDisplay', () => {
     const mockWeatherData: CurrentWeatherData = {
-        timestamp: new Date().toISOString(),
         temperature_2m: 20,
         apparent_temperature: 21,
         relative_humidity_2m: 65,
         precipitation: 0,
-        rain: 0,
-        showers: 0,
-        snowfall: 0,
-        wind_speed_10m: 15,
-        wind_direction_10m: 180,
+        precipitation_probability: 10,
+        wind_speed_10m: 12,
+        wind_direction_10m: 230,
+        surface_pressure: 1015,
         weather_code: 1,
         is_day: 1,
-        cloud_cover: 25,
-        surface_pressure: 1013.25
+        uv_index: 5
     };
 
     const mockProps = {
@@ -66,7 +63,7 @@ describe('CurrentWeatherDisplay', () => {
         await waitFor(() => {
             expect(screen.getByText('20°C')).toBeInTheDocument();
             expect(screen.getByText('65%')).toBeInTheDocument();
-            expect(screen.getByText('15 kph')).toBeInTheDocument();
+            expect(screen.getByText('12 kph')).toBeInTheDocument();
             expect(screen.getByText('0.0 mm')).toBeInTheDocument();
         });
     });
