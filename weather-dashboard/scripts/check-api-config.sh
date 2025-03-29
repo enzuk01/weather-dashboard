@@ -17,6 +17,33 @@ cd "$PROJECT_DIR" || { echo "Failed to navigate to project directory"; exit 1; }
 
 ERRORS=0
 
+# Check frontend package.json for required dependencies
+if [ -f "frontend/package.json" ]; then
+    echo "Checking frontend/package.json for required dependencies..."
+
+    # Check for TypeScript
+    if grep -q '"typescript":' "frontend/package.json"; then
+        echo -e "${GREEN}✓ TypeScript dependency exists${NC}"
+    else
+        echo -e "${RED}✗ TypeScript dependency is missing${NC}"
+        ERRORS=$((ERRORS+1))
+    fi
+
+    # Check for other critical dependencies
+    CRITICAL_DEPS=("react" "react-dom" "react-scripts")
+    for dep in "${CRITICAL_DEPS[@]}"; do
+        if grep -q "\"${dep}\":" "frontend/package.json"; then
+            echo -e "${GREEN}✓ Critical dependency ${dep} exists${NC}"
+        else
+            echo -e "${RED}✗ Critical dependency ${dep} is missing${NC}"
+            ERRORS=$((ERRORS+1))
+        fi
+    done
+else
+    echo -e "${RED}✗ frontend/package.json not found${NC}"
+    ERRORS=$((ERRORS+1))
+fi
+
 # Check frontend API configuration
 if [ -f "frontend/src/config/api.ts" ]; then
     echo "Checking frontend/src/config/api.ts..."
@@ -36,12 +63,22 @@ if [ -f "frontend/src/config/api.ts" ]; then
         echo -e "${RED}✗ Backend port may not be correctly set to 5003${NC}"
         ERRORS=$((ERRORS+1))
     fi
+
+    # Check for required API properties
+    for prop in "CACHE_TTL" "ENDPOINTS" "TIMEOUT"; do
+        if grep -q "${prop}:" "frontend/src/config/api.ts"; then
+            echo -e "${GREEN}✓ API property ${prop} exists${NC}"
+        else
+            echo -e "${RED}✗ Required API property ${prop} is missing${NC}"
+            ERRORS=$((ERRORS+1))
+        fi
+    done
 else
     echo -e "${RED}✗ frontend/src/config/api.ts not found${NC}"
     ERRORS=$((ERRORS+1))
 fi
 
-# Check weather service imports
+# Check weather service imports and exports
 if [ -f "frontend/src/services/weatherService.ts" ]; then
     echo "Checking frontend/src/services/weatherService.ts..."
 
@@ -58,6 +95,26 @@ if [ -f "frontend/src/services/weatherService.ts" ]; then
         echo -e "${GREEN}✓ API.BASE_URL usage is correct${NC}"
     else
         echo -e "${RED}✗ API.BASE_URL usage is incorrect${NC}"
+        ERRORS=$((ERRORS+1))
+    fi
+
+    # Check for required function exports
+    REQUIRED_EXPORTS=("fetchCurrentWeather" "fetchHourlyForecast" "fetchDailyForecast")
+    for func in "${REQUIRED_EXPORTS[@]}"; do
+        if grep -q "export const ${func}" "frontend/src/services/weatherService.ts"; then
+            echo -e "${GREEN}✓ Required function ${func} is exported${NC}"
+        else
+            echo -e "${RED}✗ Required function export '${func}' is missing${NC}"
+            ERRORS=$((ERRORS+1))
+        fi
+    done
+
+    # Check for basic functionality - file should be at least 100 lines
+    LINE_COUNT=$(wc -l < "frontend/src/services/weatherService.ts")
+    if [ "$LINE_COUNT" -gt 100 ]; then
+        echo -e "${GREEN}✓ weatherService.ts has sufficient implementation (${LINE_COUNT} lines)${NC}"
+    else
+        echo -e "${RED}✗ weatherService.ts seems too small for a complete implementation (only ${LINE_COUNT} lines)${NC}"
         ERRORS=$((ERRORS+1))
     fi
 else

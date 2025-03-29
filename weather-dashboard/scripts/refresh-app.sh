@@ -71,20 +71,73 @@ else
   PACKAGE_MANAGER="npm"
 fi
 
-# Rebuild frontend
-echo "🏗️ Rebuilding frontend with $PACKAGE_MANAGER..."
+# Verify TypeScript compilation before attempting build
+echo "🔍 Verifying TypeScript compilation..."
 cd frontend || { echo "Failed to navigate to frontend directory"; exit 1; }
 
+# Create a temporary TypeScript check command
 if [ "$PACKAGE_MANAGER" = "npm" ]; then
+  echo '{"scripts": {"typecheck": "tsc --noEmit"}}' > temp-package.json
+  MERGED_PACKAGE=$(jq -s '.[0].scripts.typecheck = .[1].scripts.typecheck | .[0]' package.json temp-package.json)
+  echo "$MERGED_PACKAGE" > package.json
+  rm temp-package.json
+
+  npm run typecheck
+  TS_CHECK_RESULT=$?
+else
+  yarn tsc --noEmit
+  TS_CHECK_RESULT=$?
+fi
+
+if [ $TS_CHECK_RESULT -ne 0 ]; then
+  echo "❌ TypeScript compilation failed! Please fix TypeScript errors before proceeding."
+  cd ..
+  exit 1
+fi
+
+echo "✅ TypeScript compilation check passed"
+
+# Rebuild frontend
+echo "🏗️ Rebuilding frontend with $PACKAGE_MANAGER..."
+
+if [ "$PACKAGE_MANAGER" = "npm" ]; then
+  # Try a development build first to catch any errors
+  echo "🧪 Trying development build first to check for errors..."
+  BUILD_OUTPUT=$(npm run build --no-production 2>&1)
+  BUILD_RESULT=$?
+
+  # Check the build output for compilation errors
+  if [ $BUILD_RESULT -ne 0 ] || echo "$BUILD_OUTPUT" | grep -q "ERROR in"; then
+    echo "❌ Frontend build failed with errors:"
+    echo "$BUILD_OUTPUT" | grep -A 5 "ERROR in"
+    cd ..
+    exit 1
+  fi
+
+  # If dev build succeeds, do the production build
   npm run build
 else
+  # Similar process for yarn
+  echo "🧪 Trying development build first to check for errors..."
+  BUILD_OUTPUT=$(yarn build --no-production 2>&1)
+  BUILD_RESULT=$?
+
+  if [ $BUILD_RESULT -ne 0 ] || echo "$BUILD_OUTPUT" | grep -q "ERROR in"; then
+    echo "❌ Frontend build failed with errors:"
+    echo "$BUILD_OUTPUT" | grep -A 5 "ERROR in"
+    cd ..
+    exit 1
+  fi
+
   yarn build
 fi
 
 if [ $? -ne 0 ]; then
-  echo "❌ Frontend build failed!"
+  echo "❌ Frontend production build failed!"
+  cd ..
   exit 1
 fi
+
 echo "✅ Frontend rebuilt successfully"
 cd ..
 
