@@ -18,7 +18,41 @@
 
 - Future enhancements under consideration
 
-## [1.3.3] - 2024-03-29
+## [1.5.0] - 2023-07-15
+
+### Added
+
+- Cache validation and cleanup on application startup
+- Browser-based cache clearing utility in `clearCache.js`
+- Comprehensive `clear-and-refresh.sh` script for quick troubleshooting
+- Added refresh-app.sh script with validation checks
+- Added weather data caching with TTL (time-to-live)
+- Added type safety for is_day property across all visualization components
+- Improved error handling in components
+
+### Fixed
+
+- Fixed critical "Cannot read properties of undefined (reading 'is_day')" error
+- Resolved TypeScript import issues with CACHE_BUSTER in storageUtils.ts
+- Implemented defensive programming with proper null checking
+- Added graceful error handling for missing or malformed weather data
+- Enhanced resilience against data format inconsistencies
+- Fixed storage compatibility issues with old cache formats
+
+### Changed
+
+- Improved cache management with memory caching and validation
+- Updated ModernDaylightVisualization to handle both number and boolean is_day values
+- Enhanced HourlyForecastWithSunrise with better error handling
+- Added data validation and fallback UI for incomplete data
+- Standardized component props and types for better type safety
+
+### Known Issues
+
+- Daylight visualization doesn't scroll correctly in sync with the forecast
+  - This has been prioritized for the next development sprint
+
+## [1.4.0] - 2023-06-15
 
 ### Added
 
