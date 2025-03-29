@@ -1,4 +1,4 @@
-name: Auto Approve
+name: Auto Approve PR
 on: pull_request
 
 jobs:
@@ -6,8 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
     steps:
       - name: Auto approve PR
         uses: hmarr/auto-approve-action@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}

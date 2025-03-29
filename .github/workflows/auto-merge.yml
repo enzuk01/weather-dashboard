@@ -16,6 +16,6 @@ jobs:
       - name: Enable Auto-merge
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}  # Use a Personal Access Token stored as a secret
           pull-request-number: ${{ github.event.pull_request.number }}
           merge-method: SQUASH
