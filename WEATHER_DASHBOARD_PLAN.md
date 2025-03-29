@@ -149,6 +149,11 @@
 7. ✅ Enhanced Git workflow with conventional commits
 8. ✅ Improved test suite organization
 9. ✅ Added real API response fixtures
+10. ✅ Fixed failing wind chill calculation in weather service
+11. ✅ Refactored server scripts to eliminate code duplication
+12. ✅ Reorganized server scripts into scripts/ directory with backward compatibility
+13. ✅ Created comprehensive server management documentation
+14. ✅ Updated server utilities to improve health checks and diagnostics
 
 ## Next Development Focus (Current Sprint)
 
@@ -176,12 +181,16 @@
    - [ ] Add performance monitoring dashboard
 
 5. **Server Management**
-   - [ ] Implement process management tools (pm2/supervisor)
-   - [ ] Enhance port management
-   - [ ] Add comprehensive logging
-   - [ ] Implement health check endpoints
-   - [ ] Add graceful shutdown
-   - [ ] Use environment variables for configuration
+   - [x] Implement process management tools (pm2/supervisor)
+   - [x] Enhance port management
+   - [x] Add comprehensive logging
+   - [x] Implement health check endpoints
+   - [x] Add graceful shutdown
+   - [x] Use environment variables for configuration
+   - [x] Create centralized server utilities
+   - [x] Implement proper script organization
+   - [x] Ensure backward compatibility with symbolic links
+   - [x] Create detailed server management documentation
 
 ## Future Phase Planning
 
@@ -209,12 +218,16 @@
 - [x] Use environment variables for server configuration.
 - [x] Run automated tests to validate server functionality.
 - [x] Update documentation with server management instructions.
+- [x] Reorganize server scripts into a dedicated scripts/ directory
+- [x] Eliminate code duplication by centralizing utility functions
+- [x] Create symbolic links for backward compatibility
+- [x] Implement comprehensive server diagnostics
 
-## Preferred Server Management Solution
+## Preferred Server Management Solutions
 
-1. **Standard Server Management (`server-restart.sh`)**
+### 1. Standard Server Management (`server-restart.sh`)
 
-This script:
+The server-restart.sh script in the scripts/ directory:
 
 - Automatically terminates any existing processes on the required ports
 - Starts both frontend and backend servers with proper environment variables
@@ -222,9 +235,30 @@ This script:
 - Provides comprehensive logging to dedicated log files
 - Ensures graceful shutdown when terminated
 
-**IMPORTANT:** Always use this script instead of manually starting servers to prevent port conflicts and ensure consistent behavior after server restarts.
-
 ```bash
 # From the project root directory
 ./server-restart.sh
 ```
+
+### 2. Advanced Server Management (`direct-start.sh`)
+
+The direct-start.sh script in the scripts/ directory:
+
+- Provides bulletproof automatic server startup
+- Handles port conflicts and competing processes
+- Monitors for crashes and restarts automatically
+- Includes comprehensive error handling
+- Integrates with server utility functions
+
+```bash
+# From the project root directory
+./direct-start.sh
+```
+
+### 3. Server Management Documentation
+
+For detailed server management information, see:
+
+- `SERVER_MANAGEMENT.md` - Comprehensive server management guide
+- `scripts/server-utils.sh` - Centralized utility functions
+- `README.md` - Updated script organization documentation
