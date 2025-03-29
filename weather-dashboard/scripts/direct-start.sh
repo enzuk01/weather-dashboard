@@ -212,39 +212,21 @@ check_process() {
     fi
 }
 
-# Check process health
+# Check process health - using the utility function from server-utils.sh
 check_process_health() {
     local pid="$1"
     local name="$2"
 
-    if [ -z "$pid" ]; then
-        log "WARN" "No PID provided for $name process health check"
-        return 1
-    fi
-
-    # Check if process is running
-    if ps -p "$pid" > /dev/null 2>&1; then
-        log "DEBUG" "$name process with PID $pid is running"
-        return 0
-    else
-        log "WARN" "$name process with PID $pid is not running"
-        return 1
-    fi
+    get_process_info "$pid" "$name"
+    return $?
 }
 
-# Check if a port is in use
+# Check if a port is in use - using the utility function from server-utils.sh
 is_port_in_use() {
     local port="$1"
     local timeout="${2:-$PORT_CHECK_TIMEOUT}"
 
-    # Use a timeout to prevent hanging if the port is in a weird state
-    if command -v timeout >/dev/null 2>&1; then
-        timeout "$timeout" bash -c "< /dev/tcp/localhost/$port" >/dev/null 2>&1
-    else
-        # Fallback for systems without the timeout command
-        ( < "/dev/tcp/localhost/$port" ) >/dev/null 2>&1
-    fi
-
+    check_port "$port"
     return $?
 }
 
@@ -265,25 +247,11 @@ get_processes_on_port() {
     fi
 }
 
-# Identify process details using PID
+# Identify process details using PID - using the utility function from server-utils.sh
 get_process_details() {
     local pid="$1"
-
-    if [ -z "$pid" ]; then
-        echo "Unknown"
-        return
-    fi
-
-    local process_info
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        process_info=$(ps -p "$pid" -o command= 2>/dev/null || echo "Unknown")
-    else
-        # Linux and others
-        process_info=$(ps -p "$pid" -o cmd= 2>/dev/null || echo "Unknown")
-    fi
-
-    echo "$process_info"
+    get_process_info "$pid"
+    return $?
 }
 
 # Kill process on a specific port
@@ -385,39 +353,14 @@ except Exception as e:
     fi
 }
 
-# Health check with exponential backoff
+# Health check with exponential backoff - using the utility function from server-utils.sh
 health_check() {
     local url="$1"
     local max_attempts="$2"
     local name="$3"
-    local attempt=1
-    local delay=1
 
-    log "INFO" "Starting health check for $name at $url"
-
-    while [ $attempt -le $max_attempts ]; do
-        log "DEBUG" "Health check attempt $attempt/$max_attempts (delay: ${delay}s)..."
-
-        # Add timeout to curl to prevent hanging
-        if curl -s --connect-timeout 5 --max-time 10 "$url" > /dev/null; then
-            log "INFO" "Health check successful for $name on attempt $attempt"
-            return 0
-        fi
-
-        log "DEBUG" "Health check failed, retrying in ${delay}s..."
-        sleep $delay
-
-        # Exponential backoff with max of 16 seconds
-        delay=$((delay * 2))
-        if [ $delay -gt 16 ]; then
-            delay=16
-        fi
-
-        attempt=$((attempt + 1))
-    done
-
-    log "ERROR" "Health check failed for $name after $max_attempts attempts"
-    return 1
+    check_url "$url" "$max_attempts"
+    return $?
 }
 
 # Ensure a port is free for use
