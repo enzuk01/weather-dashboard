@@ -1,3 +1,102 @@
+# Weather Dashboard
+
+A modern, responsive weather dashboard application with real-time weather data, forecasts, and visualizations.
+
+## Latest Updates
+
+The application has been significantly improved with:
+
+- **Enhanced stability** through better error handling and defensive programming
+- **Improved cache management** with memory caching and data validation
+- **New troubleshooting tools** to easily reset the application if needed
+- **TypeScript improvements** for better type safety across components
+- **Resilient data handling** to prevent rendering errors with incomplete data
+
+## Features
+
+- Current weather conditions
+- Hourly and daily forecasts
+- Interactive daylight visualization
+- Wind and precipitation data
+- Favorite locations management
+- Responsive design for all devices
+- Dark/Light mode support
+- Offline capabilities
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16+)
+- Python 3.9+
+- An API key from a supported weather provider
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+   ```
+   cd weather-dashboard/frontend && npm install
+   cd ../backend && pip install -r requirements.txt
+   ```
+
+3. Configure your API key in `backend/config.py`
+4. Start the application:
+
+   ```
+   ./direct-start.sh
+   ```
+
+## Troubleshooting
+
+If you encounter any issues with the application:
+
+1. **Use the cache clearing script**:
+
+   ```
+   ./scripts/clear-and-refresh.sh
+   ```
+
+   This script will:
+   - Clear all frontend build artifacts
+   - Generate a new cache buster
+   - Clean backend cache files
+   - Stop any running servers
+   - Restart the application fresh
+
+2. **Check the logs**:
+   - Frontend logs: `weather-dashboard/logs/frontend.log`
+   - Backend logs: `weather-dashboard/logs/backend.log`
+
+3. **Common issues**:
+   - If visualization doesn't sync with forecast (known issue, being addressed)
+   - If weather data doesn't load, check your API key and network connection
+   - If UI appears broken, try clearing your browser cache
+
+## Development
+
+### Project Structure
+
+- `/frontend` - React-based UI
+- `/backend` - Python Flask API server
+- `/scripts` - Utility scripts for development and maintenance
+- `/logs` - Application logs
+
+### Key Technologies
+
+- **Frontend**: React, TypeScript, TailwindCSS
+- **Backend**: Python, Flask
+- **Data**: OpenMeteo Weather API
+
+## Contributing
+
+Please see our [contribution guidelines](CONTRIBUTING.md) for details on code style, branch naming, and pull request processes.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Server Management
 
 For reliable development, the project includes multiple server management options:
@@ -154,3 +253,56 @@ If you encounter server issues:
 4. If TypeScript errors appear, they're suppressed during development but can be reviewed in the console.
 
 5. For detailed troubleshooting steps, see `SERVER_MANAGEMENT.md`
+
+## Feature Flags
+
+The Weather Dashboard includes a feature flag system that allows toggling between original and enhanced UI components:
+
+### Available Feature Flags
+
+- **Enhanced Current Weather**: Toggles between the original and enhanced current weather display component.
+- **Enhanced Sunrise & Sunset**: Toggles between the original and enhanced sunrise/sunset visualization.
+
+### How to Use Feature Flags
+
+1. Click on the "UI Options" button in the header
+2. Toggle the switches to enable/disable enhanced features
+3. Changes take effect immediately without page reload
+
+### For Developers
+
+The feature flags system is implemented using React Context:
+
+- `FeatureFlagsContext.tsx`: Manages flag state and provides methods to toggle flags
+- `FeatureFlagsPanel.tsx`: Provides the UI for toggling flags
+
+To add a new feature flag:
+
+1. Add the flag to the `FeatureFlags` interface in `FeatureFlagsContext.tsx`
+2. Update the `FeatureFlagsPanel` component to include the new flag
+3. Use conditional rendering with the feature flag in your components
+
+Example:
+
+```tsx
+const { flags } = useFeatureFlags();
+
+return (
+  <>
+    {flags.yourNewFeatureFlag ? (
+      <EnhancedComponent />
+    ) : (
+      <OriginalComponent />
+    )}
+  </>
+);
+```
+
+## Documentation
+
+- [Server Management](SERVER_MANAGEMENT.md) - Detailed server management instructions
+- [Test Plan](TEST_PLAN.md) - Comprehensive testing strategy
+- [Feature Flags](FEATURE_FLAGS.md) - Feature flag system overview and usage
+- [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) - Performance improvements and strategies
+- [Release Workflow](RELEASE_WORKFLOW.md) - Release process and versioning
+- [Changelog](CHANGELOG.md) - Detailed version history

@@ -46,8 +46,9 @@ export interface CurrentWeatherData {
 
 // Hourly forecast data
 export interface HourlyForecastData {
+    timestamp?: number;  // Timestamp when this data was fetched
     timestamps: string[];
-    time?: string[];  // Alternative property name that might be used
+    time: string[];  // For backward compatibility
     temperature_2m: number[];
     apparent_temperature?: number[];
     feels_like_temperature?: number[];
@@ -62,11 +63,11 @@ export interface HourlyForecastData {
     wind_direction_10m: number[];
     wind_gusts_10m?: number[];
     relative_humidity_2m?: number[];
-    is_day: number[];
+    is_day?: number[] | boolean[];  // Allow both number[] (API format) and boolean[] formats
     latitude?: number;
     longitude?: number;
-    elevation?: number;
     timezone?: string;
+    elevation?: number;
 }
 
 // Daily forecast data

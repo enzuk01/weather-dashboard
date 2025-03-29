@@ -11,7 +11,7 @@ import traceback
 import math
 
 # Import our basic client implementation
-from openmeteo_client import OpenMeteoClient, format_current_weather, format_hourly_forecast
+from openmeteo_client import OpenMeteoClient, format_current_weather, format_hourly_forecast, format_daily_forecast
 
 # Initialize the client
 om = OpenMeteoClient()
@@ -189,7 +189,7 @@ def get_daily_forecast(latitude, longitude, days=7):
 
         # Using basic implementation
         response = om.get_weather(params)
-        formatted_data = om.format_daily_forecast(response, days)
+        formatted_data = format_daily_forecast(response, days)
 
         # Extract the daily data and metadata
         daily_data = formatted_data.get('daily', {})

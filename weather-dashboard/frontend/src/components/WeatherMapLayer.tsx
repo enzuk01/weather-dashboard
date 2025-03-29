@@ -119,7 +119,7 @@ const WeatherMapLayer: React.FC<WeatherMapLayerProps> = ({ type }) => {
                             value = data.wind_speed_10m;
                             break;
                         case 'clouds':
-                            value = data.cloud_cover;
+                            value = data.cloud_cover ?? 0;
                             break;
                         default:
                             return;

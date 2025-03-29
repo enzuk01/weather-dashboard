@@ -6,6 +6,7 @@ import OfflineIndicator from './ui/OfflineIndicator';
 import { useTheme } from '../contexts/ThemeContext';
 import LocationMenu from './LocationMenu';
 import { Location } from './LocationSearch';
+import FeatureFlagsPanel from './ui/FeatureFlagsPanel';
 
 interface HeaderProps {
     title: string;
@@ -22,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
     const { isDark } = useTheme();
     const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+    const [isFeatureFlagsOpen, setIsFeatureFlagsOpen] = useState(false);
 
     return (
         <>
@@ -50,6 +52,22 @@ const Header: React.FC<HeaderProps> = ({
                             Change Location
                         </span>
                     </button>
+
+                    {/* Feature Flags Button */}
+                    <button
+                        onClick={() => setIsFeatureFlagsOpen(true)}
+                        className="flex items-center space-x-2 px-3 py-1.5 rounded-full
+                            hover:bg-white/10 transition-colors"
+                        aria-label="UI Enhancements"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm md:text-base font-medium">
+                            UI Options
+                        </span>
+                    </button>
+
                     <ThemeToggle />
                     <button
                         onClick={onSettingsClick}
@@ -70,6 +88,11 @@ const Header: React.FC<HeaderProps> = ({
                 onClose={() => setIsLocationMenuOpen(false)}
                 currentLocation={currentLocation}
                 onLocationSelect={onLocationChange}
+            />
+
+            <FeatureFlagsPanel
+                isOpen={isFeatureFlagsOpen}
+                onClose={() => setIsFeatureFlagsOpen(false)}
             />
         </>
     );

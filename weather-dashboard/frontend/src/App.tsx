@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import CurrentWeatherDisplay from './components/CurrentWeatherDisplay';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+// Import core components synchronously
+import OriginalCurrentWeatherDisplay from './components/CurrentWeatherDisplay';
 import HourlyForecastCards from './components/HourlyForecastCards';
 import SunriseSunsetChart from './components/SunriseSunsetChart';
 import PrecipitationChart from './components/PrecipitationChart';
@@ -15,13 +16,27 @@ import OfflineIndicator from './components/ui/OfflineIndicator';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
-import { fetchHourlyForecast } from './services/weatherService';
+import { FeatureFlagsProvider, useFeatureFlags } from './contexts/FeatureFlagsContext';
+import { fetchHourlyForecast, preloadWeatherData } from './services/weatherService';
 import { HourlyForecastData } from './types/weatherTypes';
 import LoadingState from './components/ui/LoadingState';
 import ErrorState from './components/ui/ErrorState';
 import SettingsPanel from './components/SettingsPanel';
-import { LoggerProvider, useLogger } from './contexts/LoggerContext';
+import { useLogger } from './contexts/LoggerContext';
 import { LoggerErrorBoundary } from './components/LoggerErrorBoundary';
+
+// Lazy-load components that aren't needed immediately
+const CurrentWeatherDisplay = lazy(() => import('./components/weather/CurrentWeatherDisplay'));
+const SunriseSunsetDisplay = lazy(() => import('./components/weather/SunriseSunsetDisplay'));
+
+// Loading fallback for lazy-loaded components
+const LazyLoadingFallback = () => (
+    <div className="animate-pulse bg-white/10 rounded-lg p-4 h-full">
+        <div className="h-6 bg-white/20 rounded w-1/3 mb-4"></div>
+        <div className="h-24 bg-white/10 rounded mb-4"></div>
+        <div className="h-10 bg-white/10 rounded w-1/2"></div>
+    </div>
+);
 
 // Main app content separated to use the settings context
 const DashboardContent: React.FC<{
@@ -39,6 +54,8 @@ const DashboardContent: React.FC<{
         const [precipError, setPrecipError] = useState<string | null>(null);
         const { isDark } = useTheme();
         const settings = useSettings();
+        const { logger } = useLogger();
+        const { flags } = useFeatureFlags();
 
         // Sample data for sunrise/sunset (would come from API in production)
         const sunriseSunsetData = hourlyData ? {
@@ -65,64 +82,56 @@ const DashboardContent: React.FC<{
             };
 
             loadHourlyData();
+
+            // Preload all data in background
+            preloadWeatherData(location.latitude, location.longitude);
         }, [location.latitude, location.longitude]);
 
         return (
             <>
-                {/* Settings Modal */}
-                <SettingsPanel
-                    isOpen={isSettingsOpen}
-                    onClose={onSettingsClose}
-                    temperatureUnit={settings.temperatureUnit}
-                    setTemperatureUnit={settings.setTemperatureUnit}
-                    windSpeedUnit={settings.windSpeedUnit}
-                    setWindSpeedUnit={settings.setWindSpeedUnit}
-                    precipitationUnit={settings.precipitationUnit}
-                    setPrecipitationUnit={settings.setPrecipitationUnit}
-                    language={settings.language}
-                    setLanguage={settings.setLanguage}
-                    refreshInterval={settings.refreshInterval}
-                    setRefreshInterval={settings.setRefreshInterval}
-                />
+                {/* Settings Panel (positioned as overlay) */}
+                {isSettingsOpen && (
+                    <Suspense fallback={<LazyLoadingFallback />}>
+                        <SettingsPanel
+                            isOpen={isSettingsOpen}
+                            onClose={onSettingsClose}
+                            {...settings}
+                        />
+                    </Suspense>
+                )}
 
                 <div className={`p-2 sm:p-3 md:p-4 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
                     <div className="w-full">
-                        <div className="mt-3 md:mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
-                            <div className="lg:col-span-1">
-                                <ErrorBoundary>
-                                    <GlassCard className="p-3 md:p-4 h-full">
+                        {/* Current Weather - now full width */}
+                        <div className="mt-3 md:mt-4">
+                            <ErrorBoundary>
+                                {flags.useEnhancedCurrentWeather ? (
+                                    <Suspense fallback={<LazyLoadingFallback />}>
                                         <CurrentWeatherDisplay
                                             latitude={location.latitude}
                                             longitude={location.longitude}
                                         />
+                                    </Suspense>
+                                ) : (
+                                    <GlassCard className="p-3 md:p-4">
+                                        <OriginalCurrentWeatherDisplay
+                                            latitude={location.latitude}
+                                            longitude={location.longitude}
+                                        />
                                     </GlassCard>
-                                </ErrorBoundary>
-                            </div>
-                            <div className="lg:col-span-2">
-                                <ErrorBoundary>
-                                    <GlassCard className="p-3 md:p-4 h-full">
-                                        <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3 md:mb-4`}>Sunrise & Sunset</h2>
-                                        {sunriseSunsetData ? (
-                                            <SunriseSunsetChart
-                                                sunrise={sunriseSunsetData.sunrise}
-                                                sunset={sunriseSunsetData.sunset}
-                                                currentTime={sunriseSunsetData.currentTime}
-                                            />
-                                        ) : (
-                                            <LoadingState message="Loading sunrise/sunset data..." />
-                                        )}
-                                    </GlassCard>
-                                </ErrorBoundary>
-                            </div>
+                                )}
+                            </ErrorBoundary>
                         </div>
 
                         {/* Weather tabs section */}
-                        <div className="mt-3 md:mt-4">
+                        <div className="mt-4 md:mt-6">
                             <ErrorBoundary>
-                                <WeatherTabs
-                                    latitude={location.latitude}
-                                    longitude={location.longitude}
-                                />
+                                <Suspense fallback={<LazyLoadingFallback />}>
+                                    <WeatherTabs
+                                        latitude={location.latitude}
+                                        longitude={location.longitude}
+                                    />
+                                </Suspense>
                             </ErrorBoundary>
                         </div>
                     </div>
@@ -131,76 +140,67 @@ const DashboardContent: React.FC<{
         );
     };
 
-function App() {
-    return (
-        <LoggerErrorBoundary>
-            <LoggerProvider>
-                <ThemeProvider>
-                    <SettingsProvider>
-                        <AppContent />
-                    </SettingsProvider>
-                </ThemeProvider>
-            </LoggerProvider>
-        </LoggerErrorBoundary>
-    );
-}
-
-const AppContent: React.FC = () => {
-    const defaultLocation: Location = {
-        name: 'London',
-        country: 'United Kingdom',
-        latitude: 51.5074,
-        longitude: -0.1278
-    };
-
-    const [currentLocation, setCurrentLocation] = useState<Location>(defaultLocation);
+// Main App component with all providers
+const App: React.FC = () => {
+    const [currentLocation, setCurrentLocation] = useState<Location>({
+        name: 'New York',
+        country: 'United States',
+        latitude: 40.7128,
+        longitude: -74.0060
+    });
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-    const [locationError, setLocationError] = useState<string | null>(null);
     const { logger } = useLogger();
 
-    const handleLocationChange = async (location: Location) => {
-        setCurrentLocation(location);
-        await logger.info('Location changed', { location }).catch(console.error);
+    // Load last selected location from localStorage
+    useEffect(() => {
+        const savedLocation = localStorage.getItem('lastLocation');
+        if (savedLocation) {
+            try {
+                const parsedLocation = JSON.parse(savedLocation);
+                setCurrentLocation(parsedLocation);
+            } catch (e) {
+                console.error('Failed to parse saved location:', e);
+            }
+        }
+    }, []);
+
+    // Update location when selected via LocationSearch
+    const handleLocationChange = async (newLocation: Location) => {
+        setCurrentLocation(newLocation);
+        try {
+            await logger.info('Location changed', { location: newLocation });
+            localStorage.setItem('lastLocation', JSON.stringify(newLocation));
+        } catch (error) {
+            console.error('Failed to log location change:', error);
+        }
     };
 
-    if (isLoadingLocation) {
-        return (
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-                <LoadingState message="Updating location..." />
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-            <ErrorBoundary>
-                <Header
-                    title="Weather Dashboard"
-                    currentLocation={currentLocation}
-                    onLocationChange={handleLocationChange}
-                    onSettingsClick={() => setIsSettingsOpen(true)}
-                />
-            </ErrorBoundary>
-
-            {locationError && (
-                <div className="bg-yellow-500/20 border border-yellow-500 text-yellow-200 px-4 py-2 text-center">
-                    {locationError}
-                </div>
-            )}
-
-            <ErrorBoundary>
-                <OfflineIndicator />
-            </ErrorBoundary>
-
-            <ErrorBoundary>
-                <DashboardContent
-                    location={currentLocation}
-                    isSettingsOpen={isSettingsOpen}
-                    onSettingsClose={() => setIsSettingsOpen(false)}
-                />
-            </ErrorBoundary>
-        </div>
+        <LoggerErrorBoundary>
+            <ThemeProvider>
+                <SettingsProvider>
+                    <FeatureFlagsProvider>
+                        <div className="min-h-screen bg-gradient-to-b from-blue-600 to-blue-400 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
+                            <Header
+                                title="Weather Dashboard"
+                                currentLocation={currentLocation}
+                                onLocationChange={handleLocationChange}
+                                onSettingsClick={() => setIsSettingsOpen(true)}
+                            />
+                            <main className="container mx-auto px-4 pb-8">
+                                <LoggerErrorBoundary>
+                                    <DashboardContent
+                                        location={currentLocation}
+                                        isSettingsOpen={isSettingsOpen}
+                                        onSettingsClose={() => setIsSettingsOpen(false)}
+                                    />
+                                </LoggerErrorBoundary>
+                            </main>
+                        </div>
+                    </FeatureFlagsProvider>
+                </SettingsProvider>
+            </ThemeProvider>
+        </LoggerErrorBoundary>
     );
 };
 

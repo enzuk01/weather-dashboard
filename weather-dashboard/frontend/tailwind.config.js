@@ -70,7 +70,10 @@ module.exports = {
                 'wind': 'wind 10s linear infinite',
                 'rain': 'rain 0.8s linear infinite',
                 'ripple': 'ripple 0.6s linear forwards',
-                'weather-float': 'weather-float 3s ease-in-out infinite'
+                'weather-float': 'weather-float 3s ease-in-out infinite',
+                'sun-glow': 'sun-glow 3s ease-in-out infinite',
+                'moon-glow': 'moon-glow 4s ease-in-out infinite',
+                'metric-pulse': 'metric-pulse 2s ease-in-out infinite'
             },
             keyframes: {
                 fadeIn: {
@@ -100,6 +103,26 @@ module.exports = {
                 'weather-float': {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-5px)' }
+                },
+                'sun-glow': {
+                    '0%, 100%': {
+                        boxShadow: '0 0 20px rgba(255, 177, 0, 0.8), 0 0 40px rgba(255, 177, 0, 0.4)'
+                    },
+                    '50%': {
+                        boxShadow: '0 0 25px rgba(255, 177, 0, 0.9), 0 0 50px rgba(255, 177, 0, 0.6)'
+                    }
+                },
+                'moon-glow': {
+                    '0%, 100%': {
+                        boxShadow: '0 0 20px rgba(210, 210, 210, 0.4), 0 0 40px rgba(210, 210, 210, 0.2)'
+                    },
+                    '50%': {
+                        boxShadow: '0 0 25px rgba(210, 210, 210, 0.5), 0 0 50px rgba(210, 210, 210, 0.3)'
+                    }
+                },
+                'metric-pulse': {
+                    '0%, 100%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.05)' }
                 }
             },
             boxShadow: {

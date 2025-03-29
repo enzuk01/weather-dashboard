@@ -218,3 +218,27 @@ When modifying server scripts:
 2. Maintain backward compatibility with symbolic links
 3. Update this documentation when changing functionality
 4. Follow the error handling patterns in existing scripts
+
+## Common Issues and Solutions
+
+### Backend Issues
+
+1. **AttributeError: 'OpenMeteoClient' object has no attribute 'format_daily_forecast'**
+
+   This error occurs when the backend attempts to call `format_daily_forecast` as a method of the `OpenMeteoClient` class, but it's actually a standalone function.
+
+   **Solution**: Update the import in `weather_service.py` to include the standalone function:
+
+   ```python
+   from openmeteo_client import OpenMeteoClient, format_daily_forecast
+   ```
+
+   And call it as a standalone function rather than a method:
+
+   ```python
+   # Incorrect:
+   # return om.format_daily_forecast(response, days)
+
+   # Correct:
+   return format_daily_forecast(response, days)
+   ```
