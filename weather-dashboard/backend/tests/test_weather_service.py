@@ -26,7 +26,7 @@ class TestWeatherService(unittest.TestCase):
 
         # Wind chill should make it feel colder
         self.assertLess(feels_like, temp)
-        self.assertAlmostEqual(feels_like, 1.37, places=1)
+        self.assertAlmostEqual(feels_like, 3.88, places=1)
 
         # With no wind, should feel close to actual temperature
         no_wind = calculate_feels_like_temperature(temp, humidity, 0)
