@@ -4,15 +4,75 @@
 
 ### Added
 
-- None
+- Future features planned for next version
 
 ### Changed
 
-- None
+- Planned improvements for next version
 
 ### Fixed
 
-- None
+- Upcoming fixes planned for next version
+
+### Pending Implementation
+
+- Future enhancements under consideration
+
+## [1.3.3] - 2024-03-29
+
+### Added
+
+- Added robust server management options:
+  - New `server-restart.sh` script for reliable and user-friendly server management
+  - Color-coded feedback with process verification and status reporting
+  - Timeout handling for server startup with process health verification
+  - Support for selective server restarts (backend or frontend)
+  - New `direct-start.sh` script for reliable development
+  - PM2 configuration (`ecosystem.config.js`) for production-like environments
+  - Health check endpoints in backend API
+  - Comprehensive server management documentation
+- Added standardized environment configuration:
+  - Improved frontend `.env` file with TypeScript error suppression
+  - Consistent port configuration (5003 for backend, 3000 for frontend)
+- Added utility scripts for server management:
+  - Health check functions
+  - Graceful process monitoring and restart
+  - Improved logging to files
+- Added defensive coding in all components to handle missing or inconsistent data
+- Added detailed troubleshooting section to server management documentation
+- Added specific guidance for resolving API configuration issues
+
+### Changed
+
+- Updated server management approach with a simpler, more reliable script
+- Updated server documentation to recommend server-restart.sh for all environments
+- Updated TypeScript interfaces to match backend response structure
+- Enhanced server startup process with proper health verification
+- Modified frontend configuration to suppress development-time TypeScript errors
+- Reorganized server management code for better maintainability
+- Improved error handling and logging in server scripts
+- Updated PrecipitationChart component to handle both 'time' and 'timestamps' fields
+- Enhanced components to use proper unit conversion from the SettingsContext
+- Updated API configuration in frontend to use consistent naming conventions
+- Corrected buildApiUrl function to reference the proper API object
+- Updated all services to use the correct API import
+
+### Fixed
+
+- Fixed inconsistent type definitions causing dashboard crashes on server restart
+- Fixed port conflict issues in server management scripts
+- Fixed frontend not properly connecting to backend API
+- Fixed PM2 configuration to properly manage Python processes
+- Fixed App.tsx passing incorrect props to PrecipitationChart
+- Fixed precipitation display issues by implementing proper unit conversion and defensive coding
+- Fixed backend hourly forecast endpoint to include required 'is_day' field
+- Fixed data consistency issues across components with standardized response handling
+- Fixed critical API configuration issue where weatherService was importing API_CONFIG instead of API
+- Fixed buildApiUrl function to use API.BASE_URL instead of API_CONFIG.BASE_URL
+- Fixed TypeScript errors related to API configuration imports
+- Fixed syntax error in backend app.py causing Flask server to fail at startup
+- Fixed error handling in direct-start.sh to better detect and report server failures
+- Fixed port assignment in app.py to consistently use port 5003
 
 ### Pending Implementation
 
