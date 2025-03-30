@@ -10,28 +10,30 @@ import {
 export interface Location {
     name: string;
     country: string;
-    lat: number;
-    lon: number;
+    lat?: number;
+    lon?: number;
+    latitude: number;
+    longitude: number;
 }
 
 // Common fields for legacy weather data
 interface BaseWeatherData {
-    timestamp: number;
-    date: string;
-    time: string;
+    timestamp?: number;
+    date?: string;
+    time?: string;
 }
 
 // Legacy ForecastData structure to maintain compatibility
 export interface ForecastData extends BaseWeatherData {
-    hour: number;
-    temperature: number;
-    humidity: number;
-    wind_speed: number;
-    wind_direction: number;
-    description: string;
-    icon: string;
+    hour?: number;
+    temperature?: number;
+    humidity?: number;
+    wind_speed?: number;
+    wind_direction?: number;
+    description?: string;
+    icon?: string;
     is_day: number | boolean;
-    precipitation: number;
+    precipitation?: number;
 }
 
 // Cache management
@@ -113,21 +115,31 @@ export const fetchCurrentWeather = async (latitude: number, longitude: number): 
     const data = await fetchWithErrorHandling(url);
 
     // Validate and transform the data to match the interface
-    return {
-        temperature_2m: data.temperature || 0,
+    const currentWeather: CurrentWeatherData = {
+        temperature_2m: data.temperature_2m || data.temperature || 0,
         apparent_temperature: data.apparent_temperature || 0,
-        feels_like_temperature: data.feels_like_temperature || data.apparent_temperature || 0,
-        relative_humidity_2m: data.relative_humidity || data.humidity || 0,
+        relative_humidity_2m: data.relative_humidity_2m || data.humidity || 0,
         precipitation: data.precipitation || 0,
         precipitation_probability: data.precipitation_probability || 0,
-        wind_speed_10m: data.wind_speed || 0,
-        wind_direction_10m: data.wind_direction || 0,
+        wind_speed_10m: data.wind_speed_10m || data.wind_speed || 0,
+        wind_direction_10m: data.wind_direction_10m || data.wind_direction || 0,
         surface_pressure: data.surface_pressure || 1013,
         weather_code: data.weather_code || 0,
-        is_day: data.is_day !== undefined ? data.is_day : 1,
-        uv_index: data.uv_index || 0,
-        cloud_cover: data.cloud_cover || 0
+        is_day: typeof data.is_day === 'number' ? data.is_day : 1
     };
+
+    // Add optional properties if they exist
+    if (data.feels_like_temperature !== undefined) {
+        currentWeather.feels_like_temperature = data.feels_like_temperature;
+    }
+    if (data.uv_index !== undefined) {
+        currentWeather.uv_index = data.uv_index;
+    }
+    if (data.cloud_cover !== undefined) {
+        currentWeather.cloud_cover = data.cloud_cover;
+    }
+
+    return currentWeather;
 };
 
 // Fetch hourly forecast data for a given location
@@ -139,17 +151,60 @@ export const fetchHourlyForecast = async (
     const url = `${API.baseUrl}/hourly?latitude=${latitude}&longitude=${longitude}&hours=${hours}`;
     const data = await fetchWithErrorHandling(url);
 
-    // Ensure we return a properly formatted data object
-    return {
-        timestamps: data.timestamps || data.time || [],
-        temperature_2m: data.temperature_2m || data.temperature || [],
-        precipitation: data.precipitation || [],
-        precipitation_probability: data.precipitation_probability || [],
-        weather_code: data.weather_code || [],
-        wind_speed_10m: data.wind_speed_10m || data.wind_speed || [],
-        wind_direction_10m: data.wind_direction_10m || data.wind_direction || [],
-        is_day: data.is_day || []
+    // Create empty arrays for required properties
+    const emptyArray = new Array(hours).fill(0);
+
+    // Ensure we return a properly formatted data object with all required fields
+    const hourlyForecast: HourlyForecastData = {
+        timestamps: data.timestamps || data.time || Array(hours).fill(new Date().toISOString()),
+        temperature_2m: data.temperature_2m || data.temperature || emptyArray,
+        precipitation: data.precipitation || emptyArray,
+        precipitation_probability: data.precipitation_probability || emptyArray,
+        weather_code: data.weather_code || emptyArray,
+        wind_speed_10m: data.wind_speed_10m || data.wind_speed || emptyArray,
+        wind_direction_10m: data.wind_direction_10m || data.wind_direction || emptyArray,
+        is_day: data.is_day || Array(hours).fill(1)
     };
+
+    // Add optional properties if they exist
+    if (data.apparent_temperature) {
+        hourlyForecast.apparent_temperature = data.apparent_temperature;
+    }
+    if (data.feels_like_temperature) {
+        hourlyForecast.feels_like_temperature = data.feels_like_temperature;
+    }
+    if (data.rain) {
+        hourlyForecast.rain = data.rain;
+    }
+    if (data.showers) {
+        hourlyForecast.showers = data.showers;
+    }
+    if (data.snowfall) {
+        hourlyForecast.snowfall = data.snowfall;
+    }
+    if (data.cloud_cover) {
+        hourlyForecast.cloud_cover = data.cloud_cover;
+    }
+    if (data.wind_gusts_10m) {
+        hourlyForecast.wind_gusts_10m = data.wind_gusts_10m;
+    }
+    if (data.relative_humidity_2m) {
+        hourlyForecast.relative_humidity_2m = data.relative_humidity_2m;
+    }
+    if (data.latitude !== undefined) {
+        hourlyForecast.latitude = data.latitude;
+    }
+    if (data.longitude !== undefined) {
+        hourlyForecast.longitude = data.longitude;
+    }
+    if (data.elevation !== undefined) {
+        hourlyForecast.elevation = data.elevation;
+    }
+    if (data.timezone) {
+        hourlyForecast.timezone = data.timezone;
+    }
+
+    return hourlyForecast;
 };
 
 // Fetch daily forecast data for a given location
@@ -161,20 +216,41 @@ export const fetchDailyForecast = async (
     const url = `${API.baseUrl}/daily?latitude=${latitude}&longitude=${longitude}&days=${days}`;
     const data = await fetchWithErrorHandling(url);
 
-    // Ensure we return a properly formatted data object
-    return {
-        time: data.time || data.dates || [],
-        temperature_2m_max: data.temperature_2m_max || data.temperature_max || [],
-        temperature_2m_min: data.temperature_2m_min || data.temperature_min || [],
-        precipitation_sum: data.precipitation_sum || data.precipitation || [],
-        precipitation_probability_max: data.precipitation_probability_max ||
-            data.precipitation_probability || [],
-        weather_code: data.weather_code || [],
-        wind_speed_10m_max: data.wind_speed_10m_max || data.wind_speed_max || [],
-        wind_direction_10m_dominant: data.wind_direction_10m_dominant || [],
-        sunrise: data.sunrise || [],
-        sunset: data.sunset || []
+    // Create empty arrays for required properties
+    const emptyArray = new Array(days).fill(0);
+    const emptyDates = Array(days).fill(new Date().toISOString().split('T')[0]);
+
+    // Ensure we return a properly formatted data object with all required fields
+    const dailyForecast: DailyForecastData = {
+        time: data.time || data.dates || emptyDates,
+        temperature_2m_max: data.temperature_2m_max || data.temperature_max || emptyArray,
+        temperature_2m_min: data.temperature_2m_min || data.temperature_min || emptyArray,
+        precipitation_sum: data.precipitation_sum || data.precipitation || emptyArray,
+        precipitation_probability_max: data.precipitation_probability_max || data.precipitation_probability || emptyArray,
+        weather_code: data.weather_code || emptyArray,
+        wind_speed_10m_max: data.wind_speed_10m_max || data.wind_speed_max || emptyArray,
+        wind_direction_10m_dominant: data.wind_direction_10m_dominant || data.wind_direction || emptyArray,
+        sunrise: data.sunrise || Array(days).fill('06:00:00'),
+        sunset: data.sunset || Array(days).fill('18:00:00')
     };
+
+    // Add optional properties if they exist
+    if (data.date) dailyForecast.date = data.date;
+    if (data.day) dailyForecast.day = data.day;
+    if (data.min_temp) dailyForecast.min_temp = data.min_temp;
+    if (data.max_temp) dailyForecast.max_temp = data.max_temp;
+    if (data.description) dailyForecast.description = data.description;
+    if (data.icon) dailyForecast.icon = data.icon;
+    if (data.precipitation) dailyForecast.precipitation = data.precipitation;
+    if (data.wind_speed) dailyForecast.wind_speed = data.wind_speed;
+    if (data.wind_direction) dailyForecast.wind_direction = data.wind_direction;
+    if (data.humidity) dailyForecast.humidity = data.humidity;
+    if (data.timestamp) dailyForecast.timestamp = data.timestamp;
+    if (data.rain_sum) dailyForecast.rain_sum = data.rain_sum;
+    if (data.apparent_temperature_max) dailyForecast.apparent_temperature_max = data.apparent_temperature_max;
+    if (data.apparent_temperature_min) dailyForecast.apparent_temperature_min = data.apparent_temperature_min;
+
+    return dailyForecast;
 };
 
 // Search for a location by query string

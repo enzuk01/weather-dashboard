@@ -25,9 +25,6 @@ logger = logging.getLogger(__name__)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
-# Get port from environment variable with fallback to 5004 (our new default)
-PORT = 5003
-
 # Try imports with fallbacks for better error handling
 try:
     from flask import Flask, jsonify, request
@@ -43,21 +40,37 @@ except ImportError as e:
     print(f"Error importing flask_cors: {e}")
     sys.exit(1)
 
+# Define a fallback Config class that will be used if import fails
+class Config:
+    API_PREFIX = '/api'
+    CORS_ORIGINS = '*'
+    DEBUG = not args.no_debug
+    PORT = PORT
+
+    @staticmethod
+    def init_app():
+        pass
+
+# Try to import config, but use our fallback if it fails
 try:
-    from config import Config
-    print("Config imported successfully")
+    # First try to import directly from config file
+    sys.path.insert(0, current_dir)
+    import config as config_module
+
+    # Check if Config class exists in the imported module
+    if hasattr(config_module, 'Config'):
+        Config = config_module.Config
+        print("Config imported successfully")
+    else:
+        # If there's no Config class, but there are config variables, adapt them
+        Config.DEBUG = getattr(config_module, 'DEBUG', Config.DEBUG)
+        Config.PORT = getattr(config_module, 'PORT', Config.PORT)
+        Config.API_PREFIX = getattr(config_module, 'API_PREFIX', '/api')
+        Config.CORS_ORIGINS = getattr(config_module, 'CORS_ORIGINS', '*')
+        print("Adapted config variables successfully")
 except ImportError as e:
     print(f"Error importing config: {e}")
-    # Define a fallback Config class
-    class Config:
-        API_PREFIX = '/api'
-        CORS_ORIGINS = '*'
-        DEBUG = True
-        PORT = PORT
-
-        @staticmethod
-        def init_app():
-            pass
+    print("Using fallback Config class")
 
 # Try to import real service functions but provide mock versions if they fail
 try:
@@ -80,12 +93,12 @@ except ImportError as e:
             "apparent_temperature": 23.1,
             "relative_humidity_2m": 65,
             "precipitation": 0,
+            "precipitation_probability": 50,  # Add this required field
             "weather_code": 1,  # Few clouds
             "wind_speed_10m": 5.2,
             "wind_direction_10m": 180,
             "surface_pressure": 1015,
-            "is_day": 1,
-            "timestamp": "2023-06-21T12:00:00Z"
+            "is_day": 1
         }
 
     def get_hourly_forecast(lat, lon, hours=24):
@@ -109,7 +122,11 @@ except ImportError as e:
             "temperature_2m_min": [15 + day % 3 for day in range(days)],
             "precipitation_sum": [day % 10 for day in range(days)],
             "precipitation_probability_max": [10 * (day % 10) for day in range(days)],
-            "weather_code": [day % 5 for day in range(days)]
+            "weather_code": [day % 5 for day in range(days)],
+            "wind_speed_10m_max": [10 + day % 5 for day in range(days)],
+            "wind_direction_10m_dominant": [180 + 10 * day for day in range(days)],
+            "sunrise": [f"06:{day:02d}:00" for day in range(days)],
+            "sunset": [f"20:{day:02d}:00" for day in range(days)]
         }
 
 # Try to import openmeteo client, but provide stub if it fails
@@ -149,13 +166,19 @@ def create_app(config_class=Config):
     app = Flask(__name__)
 
     # Initialize configuration
-    config_class.init_app()
+    app.config.from_object(config_class)
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
+    if hasattr(config_class, 'init_app'):
+        config_class.init_app()
 
     # Configure CORS
-    CORS(app, resources={r"/api/*": {"origins": config_class.CORS_ORIGINS}})
+    CORS(app, resources={r"/api/*": {"origins": getattr(config_class, 'CORS_ORIGINS', '*')}})
 
     # API Routes
-    @app.route(f'{config_class.API_PREFIX}/weather/current')
+    api_prefix = getattr(config_class, 'API_PREFIX', '/api')
+
+    @app.route(f'{api_prefix}/weather/current')
     def current_weather():
         """Get current weather for a location"""
         try:
@@ -168,7 +191,7 @@ def create_app(config_class=Config):
             logger.exception('Error fetching current weather: %s', str(e))
             return jsonify({"error": str(e)}), 500
 
-    @app.route(f'{config_class.API_PREFIX}/weather/forecast/hourly')
+    @app.route(f'{api_prefix}/weather/forecast/hourly')
     def hourly_forecast():
         """Get hourly forecast for a location"""
         try:
@@ -182,7 +205,7 @@ def create_app(config_class=Config):
             logger.exception('Error fetching hourly forecast: %s', str(e))
             return jsonify({"error": str(e)}), 500
 
-    @app.route(f'{config_class.API_PREFIX}/weather/forecast/daily')
+    @app.route(f'{api_prefix}/weather/forecast/daily')
     def daily_forecast():
         """Get daily forecast for a location"""
         try:
@@ -196,25 +219,53 @@ def create_app(config_class=Config):
             logger.exception('Error fetching daily forecast: %s', str(e))
             return jsonify({"error": str(e)}), 500
 
-    @app.route(f'{config_class.API_PREFIX}/health')
+    @app.route(f'{api_prefix}/health')
     def health_check():
-        """Health check endpoint"""
+        """Health check endpoint for the API"""
+        try:
+            return jsonify({
+                "status": "healthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "uptime": performance_monitor.get_metrics()["uptime_seconds"],
+                "api_version": "1.0.0"
+            })
+        except Exception as e:
+            logger.exception('Error in health check: %s', str(e))
+            return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
+    @app.route(f'{api_prefix}/config')
+    def get_config():
+        """Get API configuration (safe values only)"""
         return jsonify({
-            'status': 'healthy',
-            'performance_metrics': performance_monitor.get_metrics()
+            "api_prefix": api_prefix,
+            "debug_mode": app.debug,
+            "port": getattr(config_class, 'PORT', 5003),
+            "server_time": datetime.utcnow().isoformat()
         })
 
     print("Flask app created successfully with all routes configured")
     return app
 
-print("Creating app instance...")
-# Create the application instance
-app = create_app()
-print("App instance created successfully")
+def run_app(app, host='0.0.0.0', port=None):
+    """Run the Flask application with the specified host and port"""
+    # Use provided port or get from config, with fallback to our default
+    if port is None:
+        port = getattr(Config, 'PORT', 5003)
 
+    # Run the app
+    app.run(host=host, port=port, debug=app.debug)
+
+# Create app instance if this file is run directly
 if __name__ == '__main__':
-    print(f"Running Flask app on port {PORT}...")
-    # Use the debug flag from command line arguments
-    debug_mode = not args.no_debug
-    print(f"Debug mode: {'enabled' if debug_mode else 'disabled'}")
-    app.run(host="0.0.0.0", port=5003, debug=debug_mode)
+    print("Creating app instance...")
+    app = create_app(Config)
+    print("App instance created successfully")
+
+    # Log what we're doing
+    port = getattr(Config, 'PORT', 5003)
+    debug_mode = "enabled" if app.debug else "disabled"
+    print(f"Running Flask app on port {port}...")
+    print(f"Debug mode: {debug_mode}")
+
+    # Run the app
+    run_app(app, port=port)
