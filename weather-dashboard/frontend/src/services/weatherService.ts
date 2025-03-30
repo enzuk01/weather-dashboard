@@ -1,6 +1,12 @@
 import { API } from '../config/api';
+import {
+    CurrentWeatherData,
+    HourlyForecastData,
+    DailyForecastData,
+    LocationData
+} from '../types/weatherTypes';
 
-// Weather data interfaces
+// Legacy location interface for backward compatibility
 export interface Location {
     name: string;
     country: string;
@@ -8,76 +14,11 @@ export interface Location {
     lon: number;
 }
 
-// Common fields for weather data
+// Common fields for legacy weather data
 interface BaseWeatherData {
     timestamp: number;
     date: string;
     time: string;
-}
-
-// Current weather data structure
-export interface CurrentWeatherData extends BaseWeatherData {
-    location: Location;
-    temperature_2m: number;
-    apparent_temperature: number;
-    relative_humidity_2m: number;
-    precipitation_probability: number;
-    precipitation: number;
-    weather_code: number;
-    cloud_cover: number;
-    wind_speed_10m: number;
-    wind_direction_10m: number;
-    is_day: number;
-    temperature: number;
-    humidity: number;
-    wind_speed: number;
-    wind_direction: number;
-    description: string;
-    icon: string;
-    sunrise: string;
-    sunset: string;
-    pressure: number;
-    feels_like: number;
-    uv_index: number;
-}
-
-// Hourly forecast data structure
-export interface HourlyForecastData {
-    timestamps: string[];
-    temperature_2m: number[];
-    apparent_temperature: number[];
-    precipitation_probability: number[];
-    precipitation: number[];
-    weather_code: number[];
-    is_day: number[];
-    cloud_cover: number[];
-    wind_speed_10m: number[];
-    wind_direction_10m: number[];
-    wind_gusts_10m?: number[];
-}
-
-// Daily forecast data structure
-export interface DailyForecastData {
-    date: string;
-    day: string;
-    min_temp: number;
-    max_temp: number;
-    description: string;
-    icon: string;
-    precipitation: number;
-    wind_speed: number;
-    wind_direction: number;
-    humidity: number;
-    timestamp: number;
-
-    // Additional fields previously used
-    temperature_2m_max?: number;
-    temperature_2m_min?: number;
-    apparent_temperature_max?: number;
-    apparent_temperature_min?: number;
-    precipitation_sum?: number;
-    rain_sum?: number;
-    weather_code?: number;
 }
 
 // Legacy ForecastData structure to maintain compatibility
@@ -149,106 +90,109 @@ export const fetchWeatherCodes = () => {
     };
 };
 
-// API functions
-export const fetchCurrentWeather = async (lat: number, lon: number): Promise<CurrentWeatherData> => {
-    const cacheKey = getCacheKey(API.ENDPOINTS.CURRENT, lat, lon);
-
-    // Check cache first
-    if (memoryCache.has(cacheKey)) {
-        const { data, timestamp } = memoryCache.get(cacheKey);
-        if (isCacheValid(timestamp, API.CACHE_TTL.CURRENT)) {
-            console.log('Using cached current weather data');
-            return data;
-        }
-    }
-
+// Generic fetch handler with error management and JSON parsing
+const fetchWithErrorHandling = async (url: string): Promise<any> => {
     try {
-        const url = buildApiUrl(`${API.ENDPOINTS.CURRENT}?lat=${lat}&lon=${lon}`);
+        console.log(`Fetching: ${url}`);
         const response = await fetch(url);
-        const data = await handleResponse(response);
 
-        // Cache the response
-        memoryCache.set(cacheKey, {
-            data,
-            timestamp: Date.now()
-        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error('Error fetching current weather:', error);
+        console.error(`Error fetching data from ${url}:`, error);
         throw error;
     }
 };
 
-export const fetchHourlyForecast = async (lat: number, lon: number, hours: number = 24): Promise<HourlyForecastData> => {
-    const cacheKey = getCacheKey(API.ENDPOINTS.HOURLY, lat, lon);
+// Fetch current weather data for a given location
+export const fetchCurrentWeather = async (latitude: number, longitude: number): Promise<CurrentWeatherData> => {
+    const url = `${API.baseUrl}/current?latitude=${latitude}&longitude=${longitude}`;
+    const data = await fetchWithErrorHandling(url);
 
-    // Check cache first
-    if (memoryCache.has(cacheKey)) {
-        const { data, timestamp } = memoryCache.get(cacheKey);
-        if (isCacheValid(timestamp, API.CACHE_TTL.HOURLY)) {
-            console.log('Using cached hourly forecast data');
-            return data;
-        }
-    }
-
-    try {
-        const url = buildApiUrl(`${API.ENDPOINTS.HOURLY}?lat=${lat}&lon=${lon}&hours=${hours}`);
-        const response = await fetch(url);
-        const data = await handleResponse(response);
-
-        // Cache the response
-        memoryCache.set(cacheKey, {
-            data,
-            timestamp: Date.now()
-        });
-
-        return data;
-    } catch (error) {
-        console.error('Error fetching hourly forecast:', error);
-        throw error;
-    }
+    // Validate and transform the data to match the interface
+    return {
+        temperature_2m: data.temperature || 0,
+        apparent_temperature: data.apparent_temperature || 0,
+        feels_like_temperature: data.feels_like_temperature || data.apparent_temperature || 0,
+        relative_humidity_2m: data.relative_humidity || data.humidity || 0,
+        precipitation: data.precipitation || 0,
+        precipitation_probability: data.precipitation_probability || 0,
+        wind_speed_10m: data.wind_speed || 0,
+        wind_direction_10m: data.wind_direction || 0,
+        surface_pressure: data.surface_pressure || 1013,
+        weather_code: data.weather_code || 0,
+        is_day: data.is_day !== undefined ? data.is_day : 1,
+        uv_index: data.uv_index || 0,
+        cloud_cover: data.cloud_cover || 0
+    };
 };
 
-export const fetchDailyForecast = async (lat: number, lon: number, days: number = 7): Promise<DailyForecastData[]> => {
-    const cacheKey = getCacheKey(API.ENDPOINTS.DAILY, lat, lon);
+// Fetch hourly forecast data for a given location
+export const fetchHourlyForecast = async (
+    latitude: number,
+    longitude: number,
+    hours: number = 24
+): Promise<HourlyForecastData> => {
+    const url = `${API.baseUrl}/hourly?latitude=${latitude}&longitude=${longitude}&hours=${hours}`;
+    const data = await fetchWithErrorHandling(url);
 
-    // Check cache first
-    if (memoryCache.has(cacheKey)) {
-        const { data, timestamp } = memoryCache.get(cacheKey);
-        if (isCacheValid(timestamp, API.CACHE_TTL.DAILY)) {
-            console.log('Using cached daily forecast data');
-            return data;
-        }
-    }
-
-    try {
-        const url = buildApiUrl(`${API.ENDPOINTS.DAILY}?lat=${lat}&lon=${lon}&days=${days}`);
-        const response = await fetch(url);
-        const data = await handleResponse(response);
-
-        // Cache the response
-        memoryCache.set(cacheKey, {
-            data,
-            timestamp: Date.now()
-        });
-
-        return data;
-    } catch (error) {
-        console.error('Error fetching daily forecast:', error);
-        throw error;
-    }
+    // Ensure we return a properly formatted data object
+    return {
+        timestamps: data.timestamps || data.time || [],
+        temperature_2m: data.temperature_2m || data.temperature || [],
+        precipitation: data.precipitation || [],
+        precipitation_probability: data.precipitation_probability || [],
+        weather_code: data.weather_code || [],
+        wind_speed_10m: data.wind_speed_10m || data.wind_speed || [],
+        wind_direction_10m: data.wind_direction_10m || data.wind_direction || [],
+        is_day: data.is_day || []
+    };
 };
 
-export const searchLocation = async (query: string): Promise<Location[]> => {
-    try {
-        const url = buildApiUrl(`${API.ENDPOINTS.SEARCH}?q=${encodeURIComponent(query)}`);
-        const response = await fetch(url);
-        return await handleResponse(response);
-    } catch (error) {
-        console.error('Error searching location:', error);
-        throw error;
+// Fetch daily forecast data for a given location
+export const fetchDailyForecast = async (
+    latitude: number,
+    longitude: number,
+    days: number = 7
+): Promise<DailyForecastData> => {
+    const url = `${API.baseUrl}/daily?latitude=${latitude}&longitude=${longitude}&days=${days}`;
+    const data = await fetchWithErrorHandling(url);
+
+    // Ensure we return a properly formatted data object
+    return {
+        time: data.time || data.dates || [],
+        temperature_2m_max: data.temperature_2m_max || data.temperature_max || [],
+        temperature_2m_min: data.temperature_2m_min || data.temperature_min || [],
+        precipitation_sum: data.precipitation_sum || data.precipitation || [],
+        precipitation_probability_max: data.precipitation_probability_max ||
+            data.precipitation_probability || [],
+        weather_code: data.weather_code || [],
+        wind_speed_10m_max: data.wind_speed_10m_max || data.wind_speed_max || [],
+        wind_direction_10m_dominant: data.wind_direction_10m_dominant || [],
+        sunrise: data.sunrise || [],
+        sunset: data.sunset || []
+    };
+};
+
+// Search for a location by query string
+export const fetchLocationBySearch = async (query: string): Promise<LocationData> => {
+    const url = `${API.geocodingUrl}?query=${encodeURIComponent(query)}`;
+    const data = await fetchWithErrorHandling(url);
+
+    if (!data || !data.latitude || !data.longitude) {
+        throw new Error('Location not found');
     }
+
+    return {
+        name: data.name || 'Unknown Location',
+        country: data.country || '',
+        state: data.state || '',
+        latitude: data.latitude,
+        longitude: data.longitude
+    };
 };
 
 export const clearWeatherCache = () => {
