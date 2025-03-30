@@ -100,6 +100,22 @@ export interface DailyForecastData {
 
     // Array of sunset times for each day
     sunset: string[];
+
+    // Additional legacy fields for backward compatibility
+    date?: string;
+    day?: string;
+    min_temp?: number;
+    max_temp?: number;
+    description?: string;
+    icon?: string;
+    precipitation?: number;
+    wind_speed?: number;
+    wind_direction?: number;
+    humidity?: number;
+    timestamp?: number;
+    rain_sum?: number;
+    apparent_temperature_max?: number;
+    apparent_temperature_min?: number;
 }
 
 // Location data
