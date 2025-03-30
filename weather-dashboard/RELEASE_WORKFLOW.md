@@ -131,3 +131,9 @@ If TypeScript compilation fails during build:
 2. Review errors and identify missing types or interfaces
 3. Check that all API interfaces match the actual backend response
 4. Verify weatherService implementation matches component expectations
+
+## Additional Pre-Release Checklist
+
+- [ ] Run `./scripts/validate-app-architecture.sh --production-only`
+- [ ] Ensure script output shows no violations (e.g. use of `API_CONFIG`, hardcoded ports)
+- [ ] Commit the validation results before applying further changes
