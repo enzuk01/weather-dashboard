@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchCurrentWeather } from './services/weatherService';
 import SearchBar from './components/SearchBar';
 import CurrentWeather from './components/CurrentWeather';
-import HourlyForecastWithSunrise from './components/HourlyForecastWithSunrise';
-import DailyForecastCards from './components/DailyForecastCards';
+import WeatherTabs from './components/WeatherTabs';
 import Footer from './components/Footer';
 import SettingsButton from './components/ui/SettingsButton';
 import LoadingState from './components/ui/LoadingState';
@@ -168,14 +167,8 @@ function App() {
                                 location={location}
                             />
 
-                            {/* Hourly forecast with sunrise/sunset visualization */}
-                            <HourlyForecastWithSunrise
-                                latitude={location.latitude}
-                                longitude={location.longitude}
-                            />
-
-                            {/* Daily forecast */}
-                            <DailyForecastCards
+                            {/* Weather tabs for different views */}
+                            <WeatherTabs
                                 latitude={location.latitude}
                                 longitude={location.longitude}
                             />
